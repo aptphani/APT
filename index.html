@@ -31,22 +31,14 @@
       background: none;
       background-image: none;
       border: 1px solid lightgreen;
-      /* Updated color reference without quotes */
       color: white;
-      /* Updated color reference without quotes */
       border-radius: 5px;
-      /* Rounded corners */
       transition: border-color 0.25s ease, box-shadow 0.25s ease;
 
       &:focus {
         outline: 0;
-        border-color: rgba(15,
-            165,
-            60,
-            1);
-        /* Ensure the border color is visible on focus */
+        border-color: rgba(15, 165, 60, 1);
         box-shadow: 0 0 0 2px rgba(15, 165, 60, 0.5);
-        /* Optional: Add a subtle box-shadow on focus */
       }
     }
 
@@ -85,78 +77,116 @@
       opacity: 0.7;
     }
 
-    .button {
-      text-align: center;
-      text-transform: uppercase;
-      cursor: pointer;
-      font-size: 20px;
-      letter-spacing: 4px;
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .cube {
+      width: 150px;
+      height: 150px;
       position: relative;
-      background-color: #16a085;
-      border: none;
-      color: #fff;
-      padding: 20px;
-      width: 200px;
-      text-align: center;
-      transition-duration: 0.4s;
-      overflow: hidden;
-      box-shadow: 0 5px 15px #193047;
-      border-radius: 4px;
-      
+      transform-style: preserve-3d;
+      animation: rotateCube 20s infinite linear;
     }
 
-    .button:hover {
-      background: #fff;
-      box-shadow: 0px 2px 10px 5px #1abc9c;
-      color: #000;
-    }
-
-    .button:after {
-      content: "";
-      background: #1abc9c;
-      display: block;
+    .cube .face {
       position: absolute;
-      padding-top: 0%;
-      padding-left: 0%;
-      margin-left: -20px !important;
-      margin-top: -0%;
-      opacity: 0;
-      transition: all 0.8s;
+      width: 150px;
+      height: 150px;
+      background: transparent;
+      border: 2px solid aliceblue;
+      opacity: 0.8;
+      overflow: hidden;
     }
 
-    .button:active:after {
-      padding: 0;
-      margin: 0;
-      opacity: 1;
-      transition: 0s;
+    .front {
+      transform: translateZ(75px);
     }
 
-    .button:focus {
-      outline: 0;
+    .back {
+      transform: rotateY(180deg) translateZ(75px);
     }
 
-    input {
-      font-size: 44pt;
-      padding: 10px;
+    .right {
+      transform: rotateY(90deg) translateZ(75px);
     }
-    
-    @media (min-width: 1745px) {
-  .button {
-    display: inline-block;
-  }
 
-  .text-link {
-    display: none;
-  }
-}
+    .left {
+      transform: rotateY(-90deg) translateZ(75px);
+    }
+
+    .top {
+      transform: rotateX(90deg) translateZ(75px);
+    }
+
+    .bottom {
+      transform: rotateX(-90deg) translateZ(75px);
+    }
+
+    .wave {
+      position: absolute;
+      width: 100%;
+      height: 0;
+      bottom: 0;
+      transition: height 1s ease;
+    }
+
+    .wave::before {
+      content: "";
+      position: absolute;
+      width: 200%;
+      height: 100%;
+      top: -50px;
+      left: 50%;
+      transform: translate(-50%, -75%);
+      border-radius: 40%;
+      background: rgba(255, 255, 255, 0.8);
+      animation: wave 5s linear infinite;
+    }
+
+    @keyframes wave {
+      0% {
+        transform: translate(-50%, -75%) rotate(0deg);
+      }
+      100% {
+        transform: translate(-50%, -75%) rotate(360deg);
+      }
+    }
+
+    @keyframes rotateCube {
+      from {
+        transform: rotateX(0deg) rotateY(0deg);
+      }
+      to {
+        transform: rotateX(360deg) rotateY(360deg);
+      }
+    }
   </style>
 </head>
 
 <body>
+  <div id="preloader">
+    <div class="cube">
+      <div class="face front"><div class="wave" style="background-color: #ff0000;"></div></div>
+      <div class="face back"><div class="wave" style="background-color: #00ff00;"></div></div>
+      <div class="face right"><div class="wave" style="background-color: #0000ff;"></div></div>
+      <div class="face left"><div class="wave" style="background-color: #ffff00;"></div></div>
+      <div class="face top"><div class="wave" style="background-color: #ff00ff;"></div></div>
+      <div class="face bottom"><div class="wave" style="background-color: #00ffff;"></div></div>
+    </div>
+  </div>
+
   <div id="main-container">
     <canvas id="matrix-rain-canvas"></canvas>
     <div id="narrative">
-      <!-- Initial narrative parts -->
       <div class="narrative-part">
         Welcome to APT! Your Behind-the-Scenes Coding Powerhouse.
       </div>
@@ -169,21 +199,8 @@
         <span id="smiley">&#9786;</span> you will thank us later!:
         <input type="text" id="userName" maxlength="3" />
       </div>
-
-      <!-- Parts to be displayed after name entry -->
       <div class="narrative-part" id="personalized-welcome">
-        Thank you, <span id="userNameDisplay"></span>. Please, choose how you
-        wish to delve into our world:
-      </div>
-      <div class="narrative-part" id="explore">
-       <p> <span class="button">Explore</span>
-         <span class="text-link" onclick="exploreLink()">Explore</span>our foundation, principles, and
-        the vision that drives us.</p>
-      </div>
-      <div class="narrative-part" id="experience">
-        <p><span class="button">Experience</span> 
-        <span class="text-link" onclick="experienceLink()">Experience</span>our expertise through
-        interactive demonstrations that highlight our innovative solutions.</p>
+        Thank you, <span id="userNameDisplay"></span>. Get ready to explore our world of innovation!
       </div>
     </div>
   </div>
@@ -193,44 +210,8 @@
     let isNamed = false;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    document.addEventListener("DOMContentLoaded", function () {
-      // Select the 'Explore' button span directly within the '#explore' div
-      const exploreSpan = document.querySelector("#explore .button");
-      exploreSpan.addEventListener("click", function () {
-        fetch("index.php") // Make sure the path to 'index.php' is correct
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            return response.text();
-          })
-          .then((html) => {
-            document.open();
-            document.write(html);
-            document.close();
-          })
-          .catch((error) => console.error("Failed to load page: ", error));
-      });
-    });
-    const experienceSpan = document.querySelector("#experience .button");
-    experienceSpan.addEventListener("click", function () {
-      fetch("experience.html") // Make sure the path to 'experience.html' is correct
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.text();
-        })
-        .then((html) => {
-          document.open();
-          document.write(html);
-          document.close();
-        })
-        .catch((error) => console.error("Failed to load page: ", error));
-    });
 
-    // Matrix rain effect initialization
-    let charset = "<A P T / >".split(""); // Initial charset assignment based on current localStorage
+    let charset = "<A P T / >".split("");
 
     function getCharset() {
       const storedName = localStorage.getItem("userName");
@@ -240,7 +221,7 @@
     }
 
     function updateCharset() {
-      charset = getCharset(); // Update charset from localStorage
+      charset = getCharset();
     }
 
     const columns = canvas.width / 20;
@@ -291,7 +272,6 @@
           .start();
       }
 
-      // Initial display of the first three narrative parts
       setTimeout(function () {
         fadeInElement(0, () => fadeInElement(1, () => fadeInElement(2)));
       }, 4000);
@@ -302,21 +282,19 @@
         localStorage.setItem("userName", userName);
         if (userName.length === 3) {
           document.getElementById("userNameDisplay").textContent = userName;
-          // Reverse order of fading out and hiding the first three narrative parts
           fadeOutElement(2, () =>
             fadeOutElement(1, () =>
               fadeOutElement(0, () => {
-                // After fading out and hiding the initial parts, start displaying the subsequent narrative parts
-                fadeInElement(3, () =>
-                  fadeInElement(4, () => fadeInElement(5))
-                );
-                // Adjust canvas opacity
-                new TWEEN.Tween({ opacity: 0.5 })
-                  .to({ opacity: 0.3 }, 2000)
-                  .onUpdate(function (object) {
-                    canvas.style.opacity = object.opacity;
-                  })
-                  .start();
+                fadeInElement(3, () => {
+                  new TWEEN.Tween({ opacity: 0.5 })
+                    .to({ opacity: 0.3 }, 2000)
+                    .onUpdate(function (object) {
+                      canvas.style.opacity = object.opacity;
+                    })
+                    .start();
+
+                  startPreloader();
+                });
               })
             )
           );
@@ -327,9 +305,34 @@
         requestAnimationFrame(animate);
         TWEEN.update(time);
       }
-      animate(); // Start the animation loop
+      animate();
     };
+
+    function startPreloader() {
+      const preloader = document.getElementById("preloader");
+      preloader.style.display = "flex";
+
+      const waves = document.querySelectorAll('.wave');
+      let progress = 0;
+
+      const interval = setInterval(() => {
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            preloader.style.opacity = 0;
+            setTimeout(() => {
+              window.location.href = "experience.html";
+            }, 500);
+          }, 2000);
+        } else {
+          progress += 2;
+          waves.forEach(wave => {
+            wave.style.height = progress + '%';
+          });
+        }
+      }, 100);
+    }
   </script>
 </body>
 
-</html> 
+</html>
