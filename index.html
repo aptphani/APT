@@ -84,6 +84,7 @@
       width: 100%;
       height: 100%;
       display: none;
+      flex-direction: column; /* Organize children in a column */
       justify-content: center;
       align-items: center;
       z-index: 9999;
@@ -95,6 +96,8 @@
       position: relative;
       transform-style: preserve-3d;
       animation: rotateCube 20s infinite linear;
+      display: block;
+      margin-bottom: 20px; /* Add some space below the cube */
     }
 
     .cube .face {
@@ -192,6 +195,29 @@
       opacity: 0;
       transition: opacity 1s ease;
     }
+
+    .loading_dots {
+      margin-top: 50px;
+      display: block;
+    }
+    
+    .loading_dots:after {
+      content: "";
+      animation: loadingDots 1.5s infinite;
+    }
+    
+    @keyframes loadingDots {
+      0%, 20% {
+        content: ".";
+      }
+      40%, 60% {
+        content: "..";
+      }
+      80%, 100% {
+        content: "...";
+      }
+    }
+    
   </style>
 </head>
 
@@ -205,6 +231,7 @@
       <div class="face top"><div class="wave" style="background-color: #ff00ff;"></div></div>
       <div class="face bottom"><div class="wave" style="background-color: #00ffff;"></div></div>
     </div>
+    <p class="loading_dots">loading</p>
   </div>
   <div id="preloader-background"></div>
 
@@ -260,7 +287,7 @@
       ctx.font = "22px 'Victor Mono'";
       for (let i = 0; i < drops.length; i++) {
         const text = charset[Math.floor(Math.random() * charset.length)];
-        ctx.fillStyle = "#0F0";
+        ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
         ctx.fillText(text, i * 20, drops[i] * 30);
         if (drops[i] * 30 > canvas.height && Math.random() > 0.975)
           drops[i] = 0;
@@ -321,15 +348,15 @@
                       canvas.style.opacity = object.opacity;
                     })
                     .start();
-  
-                  startPreloader();
+      
+                  startPreloader(); // Ensure this is called only after name is entered
                 });
               })
             )
           );
         }
       });
-  
+      
       function animate(time) {
         requestAnimationFrame(animate);
         TWEEN.update(time);
