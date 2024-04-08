@@ -169,6 +169,29 @@
         transform: rotateX(360deg) rotateY(360deg);
       }
     }
+
+    #preloader-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      opacity: 0;
+      z-index: 9998;
+      transition: opacity 1s ease;
+    }
+
+    #experience-iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
   </style>
 </head>
 
@@ -183,6 +206,7 @@
       <div class="face bottom"><div class="wave" style="background-color: #00ffff;"></div></div>
     </div>
   </div>
+  <div id="preloader-background"></div>
 
   <div id="main-container">
     <canvas id="matrix-rain-canvas"></canvas>
@@ -204,6 +228,7 @@
       </div>
     </div>
   </div>
+  <iframe id="experience-iframe" src="experience.html"></iframe>
   <script>
     const canvas = document.getElementById("matrix-rain-canvas");
     const ctx = canvas.getContext("2d");
@@ -247,7 +272,7 @@
     window.onload = function () {
       const userNameInput = document.getElementById("userName");
       let narrativeParts = document.querySelectorAll(".narrative-part");
-
+  
       function fadeInElement(index, onCompleteCallback) {
         narrativeParts[index].style.display = "block";
         let tween = new TWEEN.Tween({ opacity: 0 })
@@ -255,10 +280,15 @@
           .onUpdate(function (object) {
             narrativeParts[index].style.opacity = object.opacity;
           })
-          .onComplete(onCompleteCallback)
+          .onComplete(function () {
+            if (index === 2) {
+              // Autofocus on the username input field after it fades in
+              userNameInput.focus();
+            }
+            if (onCompleteCallback) onCompleteCallback();
+          })
           .start();
       }
-
       function fadeOutElement(index, onCompleteCallback) {
         let tween = new TWEEN.Tween({ opacity: 1 })
           .to({ opacity: 0 }, 200)
@@ -271,11 +301,10 @@
           })
           .start();
       }
-
       setTimeout(function () {
         fadeInElement(0, () => fadeInElement(1, () => fadeInElement(2)));
       }, 4000);
-
+  
       userNameInput.addEventListener("input", function () {
         const userName = userNameInput.value;
         isNamed = true;
@@ -292,7 +321,7 @@
                       canvas.style.opacity = object.opacity;
                     })
                     .start();
-
+  
                   startPreloader();
                 });
               })
@@ -300,17 +329,22 @@
           );
         }
       });
-
+  
       function animate(time) {
         requestAnimationFrame(animate);
         TWEEN.update(time);
       }
       animate();
     };
-
+  
     function startPreloader() {
       const preloader = document.getElementById("preloader");
+      const preloaderBackground = document.getElementById("preloader-background");
+      const mainContainer = document.getElementById("main-container");
+      const experienceIframe = document.getElementById("experience-iframe");
+
       preloader.style.display = "flex";
+      preloaderBackground.style.opacity = 1;
 
       const waves = document.querySelectorAll('.wave');
       let progress = 0;
@@ -319,20 +353,26 @@
         if (progress >= 100) {
           clearInterval(interval);
           setTimeout(() => {
-            preloader.style.opacity = 0;
-            setTimeout(() => {
-              window.location.href = "experience.html";
-            }, 500);
-          }, 2000);
+            new TWEEN.Tween({ opacity: 1 })
+              .to({ opacity: 0 }, 1000)
+              .onUpdate(function (object) {
+                preloader.style.opacity = object.opacity;
+                preloaderBackground.style.opacity = object.opacity;
+                mainContainer.style.opacity = object.opacity;
+              })
+              .onComplete(function () {
+                experienceIframe.style.opacity = 1;
+              })
+              .start();
+          }, 8000);
         } else {
-          progress += 2;
+          progress += 1.25;
           waves.forEach(wave => {
             wave.style.height = progress + '%';
           });
         }
       }, 100);
-    }
-  </script>
+    }</script>
 </body>
 
 </html>

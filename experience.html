@@ -198,7 +198,7 @@
     left: 50%;
     transform: translateX(-50%) rotateX(0);
     transform-origin: top;
-    background: #DDF1FA;
+    background: #a0dbf7;
     padding: 20px;
     border: 1px solid #283593;
     border-radius: 0 0 15px 15px;
@@ -208,6 +208,7 @@
 }
 
 #toast.open {
+  position:absolute;
     top: 0;
     animation: flapDown 0.5s forwards;
 }
@@ -287,7 +288,7 @@
     .button:focus {
       outline: 0;
     }
-        #loading {
+        /* #loading {
       position: fixed;
       top: 0;
       left: 0;
@@ -298,7 +299,7 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
-    }
+    } */
 
     #loading-text {
       color: white;
@@ -308,9 +309,9 @@
       </head>
 
       <body>
-        <div id="loading">
+        <!-- <div id="loading">
           <div id="loading-text">Loading...</div>
-        </div>
+        </div> -->
 
         <button id="homeButton" class="button" style="position: absolute; top: 20px; left: 20px; z-index: 10; user-select: none;">Home</button>
 <button id="exploreButton" class="button" style="position: absolute; top: 20px; left: 15%; z-index: 10; user-select: none;">Explore</button>
@@ -321,7 +322,7 @@
             onclick="document.getElementById('toast').style.display='none';"
             >&times;</span
           >
-          ðŸ–± Drag the cube to rotate it.<br />ðŸ‘† Double-click a face to
+          Drag the cube to rotate it.<br />Double-click a face to
           experience an animation pattern.
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
@@ -588,7 +589,7 @@
           }
 
           preloadVideoTextures(videoPaths, () => {
-            document.getElementById("loading").style.display = "none";
+            //document.getElementById("loading").style.display = "none";
             createCube();
           });
 
