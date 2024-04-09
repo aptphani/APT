@@ -184,25 +184,31 @@
       z-index: 1;
       transition: opacity 1s ease;
     }
-
-    .loading_dots {
-      margin-top: 50px;
-      display: block;
-    }
-    
-    .loading_dots:after {
-      content: "";
-      animation: loadingDots 1.5s infinite;
-    }
-    #experience-iframe {
-      position: fixed;
-      top: 0;
-      left: 0;
+    #personalized-welcome {
+      position: absolute;
+      top: 20%;
+      left: 25%;
       width: 100%;
       height: 100%;
-      z-index: -1; /* Initially set to -1 to prevent interference */
-      opacity: 0;
-      transition: opacity 1s ease, z-index 0s ease 1s; /* Add transition for z-index if needed */
+      display: none;
+      justify-content: center;
+      align-items: center;
+      font-size: 24pt;
+      color: white;
+    }
+
+    .loading_text {
+      display: flex; /* Use flexbox to layout the text and dots */
+      align-items: center; /* Center the items vertically */
+      justify-content: center; 
+      margin-top: 50px;/* Center the content horizontally */
+    }
+    
+    .loading_dots {
+      display: inline-block;
+      width: 30px; /* Reserve space for the dots */
+      text-align: left; /* Align the dots to the left */
+      animation: loadingDots 1.5s infinite step-start; /* Adjust animation */
     }
     
     @keyframes loadingDots {
@@ -217,6 +223,18 @@
       }
     }
     
+    #experience-iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1; /* Initially set to -1 to prevent interference */
+      opacity: 0;
+      transition: opacity 1s ease, z-index 0s ease 1s; /* Add transition for z-index if needed */
+    }
+    
+    
   </style>
 </head>
 
@@ -230,10 +248,13 @@
       <div class="face top"><div class="wave" style="background-color: #ff00ff;"></div></div>
       <div class="face bottom"><div class="wave" style="background-color: #00ffff;"></div></div>
     </div>
-    <p class="loading_dots">loading</p>
+    <p class="loading_text">loading<span class="loading_dots"></span></p>
+
   </div>
   <div id="preloader-background"></div>
-
+  <div id="personalized-welcome">
+    Thank you, <span id="userNameDisplay"></span>. Get ready to explore our world of innovation!
+  </div>
   <div id="main-container">
     <canvas id="matrix-rain-canvas"></canvas>
     <div id="narrative">
@@ -249,9 +270,7 @@
         <span id="smiley">&#9786;</span> you will thank us later!
         <input type="text" id="userName" maxlength="3" />
       </div>
-      <div class="narrative-part" id="personalized-welcome">
-        Thank you, <span id="userNameDisplay"></span>. Get ready to explore our world of innovation!
-      </div>
+     
     </div>
   </div>
   <iframe id="experience-iframe" src="experience.html"></iframe>
@@ -268,7 +287,14 @@
         console.log('Clicked element ID:', event.target.id);
         console.log('Clicked element classes:', event.target.className);
       }, true);
-  
+      function animateLoadingDots() {
+        const dots = document.querySelector('.loading_dots');
+        let dotCount = 0;
+        setInterval(() => {
+          dotCount = (dotCount % 3) + 1; // Cycle dotCount from 1 to 3
+          dots.textContent = '.'.repeat(dotCount); // Set the textContent of the span to one, two, or three dots
+        }, 500); // Adjust the interval time as needed
+      }
     function getCharset() {
       const storedName = localStorage.getItem("userName");
       return isNamed && storedName ? storedName.split("") : "<A P T / >".split("");
@@ -298,6 +324,7 @@
     setInterval(drawMatrixRain, 50);
   
     window.onload = function () {
+      animateLoadingDots();
       const userNameInput = document.getElementById("userName");
       let narrativeParts = document.querySelectorAll(".narrative-part");
   
@@ -341,6 +368,7 @@
     };
   
     function startPreloader() {
+      const personalizedWelcome = document.getElementById("personalized-welcome");
       const preloader = document.getElementById("preloader");
       const preloaderBackground = document.getElementById("preloader-background");
       const experienceIframe = document.getElementById("experience-iframe");
@@ -350,7 +378,9 @@
       preloaderBackground.style.opacity = 1;
       preloaderBackground.style.zIndex = 9000;
       preloader.style.zIndex = 9999;
-      experienceIframe.style.zIndex = "-1"; // Ensure iframe doesn't interfere initially
+      experienceIframe.style.zIndex = -1;
+      personalizedWelcome.style.zIndex = 10000;
+      personalizedWelcome.style.display="block"; // Ensure iframe doesn't interfere initially
   
       const waves = document.querySelectorAll('.wave');
       let progress = 0;
