@@ -153,142 +153,140 @@
         />
 
         <style>
-              body {
-        margin: 0;
-      }
-      canvas {
-        display: block;
-      }
-      #modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 999;
-        background: radial-gradient(circle, navy 0%, #010a30 80%);
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        overflow: hidden;
-      }
-      #modal > canvas {
-        z-index: 1000;
-        position: absolute;
-        height: 100%;
-        width: 100%;
-      }
-      .close-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        z-index: 1002;
-        background-color: #ff6b35;
-        color: black;
-        border: none;
-        padding: 5px 10px;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 5px;
-      }
-   #toast {
-    position: fixed;
-    top: -100%;
-    left: 50%;
-    transform: translateX(-50%) rotateX(0);
-    transform-origin: top;
-    background: #a0dbf7;
-    padding: 20px;
-    border: 1px solid #283593;
-    border-radius: 0 0 15px 15px;
-    box-shadow: 0px 10px 15px lightblue;
-    transition: top 0.5s ease-out, transform 0.5s ease-out;
-    z-index: 1000;
-}
+          body {
+            margin: 0;
+          }
+          canvas {
+            display: block;
+          }
+          #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+            background: radial-gradient(circle, navy 0%, #010a30 80%);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+          }
+          #modal > canvas {
+            z-index: 1000;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+          }
+          .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1002;
+            background-color: #ff6b35;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+          }
+          #toast {
+            position: fixed;
+            top: -100%;
+            left: 50%;
+            transform: translateX(-50%) rotateX(0);
+            transform-origin: top;
+            background: #a0dbf7;
+            padding: 20px;
+            border: 1px solid #283593;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0px 10px 15px lightblue;
+            transition: top 0.5s ease-out, transform 0.5s ease-out;
+            z-index: 1000;
+          }
 
-#toast.open {
-  position:absolute;
-    top: 0;
-    animation: flapDown 0.5s forwards;
-}
+          #toast.open {
+            position: absolute;
+            top: 0;
+            animation: flapDown 0.5s forwards;
+          }
 
-@keyframes flapDown {
-    0% {
-        transform: rotateX(-90deg);
-    }
-    100% {
-        transform: rotateX(0deg);
-    }
-}
+          @keyframes flapDown {
+            0% {
+              transform: rotateX(-90deg);
+            }
+            100% {
+              transform: rotateX(0deg);
+            }
+          }
 
-    #toast .close {
-        display: inline-block;
-      font-size: 20px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #fff;
-      width: 32px;
-      height:32px;
-      padding:9px;
-      border-radius:50%;
-      background-color:#AE1A5B;
-      font-weight:bold;
-      text-align: center; 
-    line-height: 10px; 
-      
-    }
-    
-    .button {
-      text-align: center;
-      text-transform: uppercase;
-      cursor: pointer;
-      font-size: 20px;
-      letter-spacing: 4px;
-      position: relative;
-      background-color: #16a085;
-      border: none;
-      color: #fff;
-      padding: 10px;
-      width: 200px;
-      text-align: center;
-      transition-duration: 0.4s;
-      overflow: hidden;
-      box-shadow: 0 5px 15px #193047;
-      border-radius: 4px;
-      
-    }
+          #toast .close {
+            display: inline-block;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            padding: 9px;
+            border-radius: 50%;
+            background-color: #ae1a5b;
+            font-weight: bold;
+            text-align: center;
+            line-height: 10px;
+          }
 
-    .button:hover {
-      background: #fff;
-      box-shadow: 0px 2px 10px 5px #1abc9c;
-      color: #000;
-    }
+          .button {
+            text-align: center;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-size: 20px;
+            letter-spacing: 4px;
+            position: relative;
+            background-color: #16a085;
+            border: none;
+            color: #fff;
+            padding: 10px;
+            width: 200px;
+            text-align: center;
+            transition-duration: 0.4s;
+            overflow: hidden;
+            box-shadow: 0 5px 15px #193047;
+            border-radius: 4px;
+          }
 
-    .button:after {
-      content: "";
-      background: #1abc9c;
-      display: block;
-      position: absolute;
-      padding-top: 0%;
-      padding-left: 0%;
-      margin-left: -20px !important;
-      margin-top: -0%;
-      opacity: 0;
-      transition: all 0.8s;
-    }
+          .button:hover {
+            background: #fff;
+            box-shadow: 0px 2px 10px 5px #1abc9c;
+            color: #000;
+          }
 
-    .button:active:after {
-      padding: 0;
-      margin: 0;
-      opacity: 1;
-      transition: 0s;
-    }
+          .button:after {
+            content: "";
+            background: #1abc9c;
+            display: block;
+            position: absolute;
+            padding-top: 0%;
+            padding-left: 0%;
+            margin-left: -20px !important;
+            margin-top: -0%;
+            opacity: 0;
+            transition: all 0.8s;
+          }
 
-    .button:focus {
-      outline: 0;
-    }
-        /* #loading {
+          .button:active:after {
+            padding: 0;
+            margin: 0;
+            opacity: 1;
+            transition: 0s;
+          }
+
+          .button:focus {
+            outline: 0;
+          }
+          /* #loading {
       position: fixed;
       top: 0;
       left: 0;
@@ -301,10 +299,10 @@
       z-index: 9999;
     } */
 
-    #loading-text {
-      color: white;
-      font-size: 24px;
-    }
+          #loading-text {
+            color: white;
+            font-size: 24px;
+          }
         </style>
       </head>
 
@@ -313,8 +311,32 @@
           <div id="loading-text">Loading...</div>
         </div> -->
 
-        <button id="homeButton" class="button" style="position: absolute; top: 20px; left: 20px; z-index: 10; user-select: none;">Home</button>
-<button id="exploreButton" class="button" style="position: absolute; top: 20px; left: 15%; z-index: 10; user-select: none;">Explore</button>
+        <button
+          id="homeButton"
+          class="button"
+          style="
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            user-select: none;
+          "
+        >
+          Home
+        </button>
+        <button
+          id="exploreButton"
+          class="button"
+          style="
+            position: absolute;
+            top: 20px;
+            left: 15%;
+            z-index: 10;
+            user-select: none;
+          "
+        >
+          Explore
+        </button>
 
         <div id="toast">
           <span
@@ -322,8 +344,8 @@
             onclick="document.getElementById('toast').style.display='none';"
             >&times;</span
           >
-          Drag the cube to rotate it.<br />Double-click a face to
-          experience an animation pattern.
+          Drag the cube to rotate it.<br />Double-click a face to experience an
+          animation pattern.
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
         <script type="importmap">
@@ -338,6 +360,12 @@
         <script type="module">
           import * as THREE from "three";
           import TWEEN from "tween";
+          import { FrontFaceAnimation } from "./scripts/FrontFaceAnimation.js";
+          import { BackFaceAnimation } from "./scripts/BackFaceAnimation.js";
+          import { RightFaceAnimation } from "./scripts/RightFaceAnimation.js";
+          import { LeftFaceAnimation } from "./scripts/LeftFaceAnimation.js";
+          import { TopFaceAnimation } from "./scripts/TopFaceAnimation.js";
+          import { BottomFaceAnimation } from "./scripts/BottomFaceAnimation.js";
 
           const scene = new THREE.Scene();
           const camera = new THREE.PerspectiveCamera(
@@ -348,185 +376,27 @@
           );
           const renderer = new THREE.WebGLRenderer({ antialias: true });
           renderer.setSize(window.innerWidth, window.innerHeight);
-          renderer.shadowMap.enabled = true;
           document.body.appendChild(renderer.domElement);
 
-          const faceNames = ["front", "back", "top", "bottom", "right", "left"];
-          const videoPaths = [
-            "Video1.mp4",
-            "Video6.mp4",
-            "Video2.mp4",
-            "Video3.mp4",
-            "Video4.mp4",
-            "Video5.mp4",
-          ];
-          const videoTextures = [];
-          let cube;
-          let totalVideos = videoPaths.length;
-          let loadedVideos = 0;
-
-          function preloadVideoTextures(paths, onComplete) {
-            paths.forEach((path, index) => {
-              const video = document.createElement("video");
-              video.src = path;
-              video.loop = true;
-              video.muted = true;
-              video.crossOrigin = "anonymous";
-              video.addEventListener("loadedmetadata", () => {
-                const texture = new THREE.VideoTexture(video);
-                videoTextures[index] = texture;
-                loadedVideos++;
-
-                if (loadedVideos === totalVideos) {
-                  onComplete();
-                }
-              });
-            });
-          }
-
-          function createCube() {
-            const planeGeometry = new THREE.PlaneGeometry(4, 4);
-            cube = new THREE.Group();
-
-            videoTextures.forEach((texture, index) => {
-              const material = new THREE.MeshBasicMaterial({
-                map: texture,
-                side: THREE.DoubleSide,
-              });
-              const plane = new THREE.Mesh(planeGeometry, material);
-              plane.name = faceNames[index];
-              cube.add(plane);
-            });
-            arrangeCubeFaces(cube.children);
-            scene.add(cube);
-
-            cube.position.set(0, 15, 40);
-            camera.position.set(0, 15, 50);
-
-            // Attach interaction events after the cube is created
-            document.addEventListener("mousedown", onMouseDown);
-            document.addEventListener("mousemove", onMouseMove);
-            document.addEventListener("mouseup", onMouseUp);
-            document.addEventListener("click", onClick);
-          }
-
-          function arrangeCubeFaces(children) {
-            children[0].position.set(0, 0, -2);
-            children[0].rotation.y = Math.PI;
-            children[1].position.set(0, 0, 2);
-            children[2].position.set(0, 2, 0);
-            children[2].rotation.x = -Math.PI / 2;
-            children[3].position.set(0, -2, 0);
-            children[3].rotation.x = Math.PI / 2;
-            children[4].position.set(2, 0, 0);
-            children[4].rotation.y = Math.PI / 2;
-            children[5].position.set(-2, 0, 0);
-            children[5].rotation.y = -Math.PI / 2;
-          }
-
-          const raycaster = new THREE.Raycaster();
-          const mouse = new THREE.Vector2();
-          let isDragging = false;
-          let candrag = true;
-          let previousMousePosition = { x: 0, y: 0 };
-          let lastClickTime = 0;
-          let rotationSpeed = 0.005;
-
-          setupLighting();
-          createFloor();
-          const instructionPlane = createInstructionPlane();
-          animate();
-
-          scene.add(instructionPlane);
-
-          function createInstructionPlane() {
-            const planeWidth = 10;
-            const planeHeight = 2;
-            const planeGeometry = new THREE.PlaneGeometry(
-              planeWidth,
-              planeHeight
-            );
-            const instructionTexture = createInstructionTexture();
-            const planeMaterial = new THREE.MeshBasicMaterial({
-              map: instructionTexture,
-              transparent: true,
-              side: THREE.DoubleSide,
-            });
-            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-
-            const distance = 30;
-            const cameraDirection = new THREE.Vector3();
-            camera.getWorldDirection(cameraDirection);
-            cameraDirection.multiplyScalar(distance);
-            plane.position.copy(camera.position).add(cameraDirection);
-
-            plane.lookAt(camera.position);
-
-            return plane;
-          }
-
-          function createInstructionTexture() {
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-            canvas.width = 1024;
-            canvas.height = 256;
-
-            context.fillStyle = "rgba(0, 255, 255, 0.5)";
-            context.fillRect(0, 0, canvas.width, canvas.height);
-
-            context.font = "48px Arial";
-            context.fillStyle = "white";
-            context.textAlign = "left";
-            context.textBaseline = "middle";
-            const text =
-              "Drag the cube to rotate. Double-click a face to select and experience an animation pattern";
-            const lines = text.split(". ");
-            const lineHeight = 60;
-            const startY =
-              (canvas.height - (lines.length - 1) * lineHeight) / 2;
-            lines.forEach((line, index) => {
-              context.fillText(
-                line,
-                canvas.width / 2,
-                startY + index * lineHeight
-              );
-            });
-
-            const texture = new THREE.CanvasTexture(canvas);
-            return texture;
-          }
-
-          var instructionVisible = true;
-          document.addEventListener("click", function () {
-            instructionVisible = false;
-            instructionPlane.visible = false;
+          // Creating a basic cube
+          const geometry = new THREE.BoxGeometry();
+          const material = new THREE.MeshBasicMaterial({
+            color: 0x00ff00,
+            wireframe: true,
           });
+          const cube = new THREE.Mesh(geometry, material);
+          scene.add(cube);
+          camera.position.z = 5;
 
-          function onMouseDown(event) {
-            isDragging = true;
-            previousMousePosition.x = event.clientX;
-            previousMousePosition.y = event.clientY;
+          // Interaction listeners
+          window.addEventListener("resize", onWindowResize, false);
+          function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
           }
 
-          function onMouseMove(event) {
-            if (isDragging && candrag && cube) {
-              const deltaMove = {
-                x: event.clientX - previousMousePosition.x,
-                y: event.clientY - previousMousePosition.y,
-              };
-              const rotateAngleX = ((deltaMove.y * Math.PI) / 180) * 0.5;
-              const rotateAngleY = ((deltaMove.x * Math.PI) / 180) * 0.5;
-              cube.rotation.x += rotateAngleX;
-              cube.rotation.y += rotateAngleY;
-              previousMousePosition = { x: event.clientX, y: event.clientY };
-            }
-          }
-
-          function onMouseUp() {
-            isDragging = false;
-          }
-
-          function onClick(event) {
+          document.addEventListener("click", function (event) {
             if (!isDragging && cube) {
               mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
               mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -551,56 +421,44 @@
                 }
               }
             }
-          }
-
-          function setupLighting() {
-            const spotLight = new THREE.SpotLight(0xffffff, 1);
-            spotLight.position.set(0, 20, 20);
-            spotLight.angle = Math.PI / 2;
-            spotLight.penumbra = 0.1;
-            spotLight.decay = 0;
-            spotLight.distance = 1000;
-            spotLight.castShadow = true;
-            scene.add(spotLight);
-          }
-
-          function createFloor() {
-            const floorGeometry = new THREE.PlaneGeometry(200, 200);
-            const floorMaterial = new THREE.MeshStandardMaterial({
-              color: 0xf7f5da,
-            });
-            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.y = -5;
-            floor.receiveShadow = true;
-            scene.add(floor);
-          }
+          });
 
           function animate() {
-            if (!isDragging && cube) {
-              cube.rotation.x += rotationSpeed;
-              cube.rotation.y += rotationSpeed;
-              instructionPlane.lookAt(camera.position);
-            }
-            instructionPlane.visible = instructionVisible;
             requestAnimationFrame(animate);
             TWEEN.update();
             renderer.render(scene, camera);
           }
+          animate();
 
-          preloadVideoTextures(videoPaths, () => {
-            //document.getElementById("loading").style.display = "none";
-            createCube();
-          });
-
-          window.addEventListener("resize", onWindowResize);
-
-          function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+          function showModal(faceName, cube) {
+            let animation;
+            switch (faceName) {
+              case "front":
+                animation = new FrontFaceAnimation("frontFaceCanvas");
+                break;
+              case "back":
+                animation = new BackFaceAnimation("backFaceCanvas");
+                break;
+              case "right":
+                animation = new RightFaceAnimation("rightFaceCanvas");
+                break;
+              case "left":
+                animation = new LeftFaceAnimation("leftFaceCanvas");
+                break;
+              case "top":
+                animation = new TopFaceAnimation("topFaceCanvas");
+                break;
+              case "bottom":
+                animation = new BottomFaceAnimation("bottomFaceCanvas");
+                break;
+            }
+            if (animation) {
+              animation.init();
+              animation.start();
+            }
           }
         </script>
+
         <script src="https://cdn.babylonjs.com/babylon.js"></script>
         <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
         <script>
@@ -1826,4 +1684,5 @@
         </script>
       </body>
     </html>
-
+  </head>
+</html>
