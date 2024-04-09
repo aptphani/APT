@@ -346,7 +346,7 @@
   
       setTimeout(function () {
         fadeInElement(0, () => fadeInElement(1, () => fadeInElement(2)));
-      }, 1000);
+      }, 500);
       userNameInput.addEventListener("click", function (event) {
         event.stopPropagation();
       });
@@ -396,6 +396,7 @@
                 preloaderBackground.style.opacity = object.opacity;
               })
               .onComplete(function () {
+                personalizedWelcome.style.zIndex = -1;
                 preloader.style.display = "none"; // Hide the preloader after the animation
                 experienceIframe.style.opacity = 1;
                 experienceIframe.style.zIndex = "10000"; // Bring iframe to the front
