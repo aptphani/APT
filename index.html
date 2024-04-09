@@ -28,7 +28,6 @@
       width: 100%;
       height: 100%;
       padding: 5px 10px;
-      z-index: 500;
       background: none;
       background-image: none;
       border: 1px solid lightgreen;
@@ -55,7 +54,7 @@
       height: 80%;
       top: 20%;
       left: 10%;
-      z-index: 2;
+      z-index: 3;
     }
 
     .narrative-part {
@@ -186,17 +185,6 @@
       transition: opacity 1s ease;
     }
 
-    #experience-iframe {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 10000;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-
     .loading_dots {
       margin-top: 50px;
       display: block;
@@ -205,6 +193,16 @@
     .loading_dots:after {
       content: "";
       animation: loadingDots 1.5s infinite;
+    }
+    #experience-iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1; /* Initially set to -1 to prevent interference */
+      opacity: 0;
+      transition: opacity 1s ease, z-index 0s ease 1s; /* Add transition for z-index if needed */
     }
     
     @keyframes loadingDots {
@@ -263,46 +261,44 @@
     let isNamed = false;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
+  
     let charset = "<A P T / >".split("");
-
+      document.addEventListener('click', function(event) {
+        console.log('Clicked element:', event.target);
+        console.log('Clicked element ID:', event.target.id);
+        console.log('Clicked element classes:', event.target.className);
+      }, true);
+  
     function getCharset() {
       const storedName = localStorage.getItem("userName");
-      return isNamed && storedName
-        ? storedName.split("")
-        : "<A P T / >".split("");
+      return isNamed && storedName ? storedName.split("") : "<A P T / >".split("");
     }
-
+  
     function updateCharset() {
       charset = getCharset();
     }
-
+  
     const columns = canvas.width / 20;
     let drops = Array(Math.floor(columns)).fill(1);
-
+  
     function drawMatrixRain() {
       updateCharset();
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+  
       ctx.font = "22px 'Victor Mono'";
       for (let i = 0; i < drops.length; i++) {
         const text = charset[Math.floor(Math.random() * charset.length)];
         ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
         ctx.fillText(text, i * 20, drops[i] * 30);
-        if (drops[i] * 30 > canvas.height && Math.random() > 0.975)
-          drops[i] = 0;
+        if (drops[i] * 30 > canvas.height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
       }
     }
     setInterval(drawMatrixRain, 50);
-
+  
     window.onload = function () {
       const userNameInput = document.getElementById("userName");
-      userNameInput.addEventListener("click", function () {
-        console.log("clicked");
-        userNameInput.focus();
-      })
       let narrativeParts = document.querySelectorAll(".narrative-part");
   
       function fadeInElement(index, onCompleteCallback) {
@@ -314,114 +310,80 @@
           })
           .onComplete(function () {
             if (index === 2) {
-              // Autofocus on the username input field after it fades in
               userNameInput.focus();
             }
             if (onCompleteCallback) onCompleteCallback();
           })
           .start();
       }
-      function fadeOutElement(index, onCompleteCallback) {
-        let tween = new TWEEN.Tween({ opacity: 1 })
-          .to({ opacity: 0 }, 200)
-          .onUpdate(function (object) {
-            narrativeParts[index].style.opacity = object.opacity;
-          })
-          .onComplete(function () {
-            narrativeParts[index].style.display = "none";
-            if (onCompleteCallback) onCompleteCallback();
-          })
-          .start();
-      }
+  
       setTimeout(function () {
         fadeInElement(0, () => fadeInElement(1, () => fadeInElement(2)));
       }, 1000);
-  
+      userNameInput.addEventListener("click", function (event) {
+        event.stopPropagation();
+      });
       userNameInput.addEventListener("input", function () {
         const userName = userNameInput.value;
-        isNamed = true;
-        localStorage.setItem("userName", userName);
+        
         if (userName.length === 3) {
+            localStorage.setItem("userName", userName);
+          startPreloader();
           document.getElementById("userNameDisplay").textContent = userName;
-          fadeOutElement(2, () =>
-            fadeOutElement(1, () =>
-              fadeOutElement(0, () => {
-                fadeInElement(3, () => {
-                  new TWEEN.Tween({ opacity: 0.5 })
-                    .to({ opacity: 0.3 }, 2000)
-                    .onUpdate(function (object) {
-                      canvas.style.opacity = object.opacity;
-                    })
-                    .start();
-  
-                  startPreloader();
-                });
-              })
-            )
-          );
         }
       });
+  
       function animate(time) {
         requestAnimationFrame(animate);
         TWEEN.update(time);
       }
       animate();
     };
-    function fadeOutPersonalizedWelcome(onCompleteCallback) {
-      const personalizedWelcome = document.getElementById("personalized-welcome");
-      let tween = new TWEEN.Tween({ opacity: 1 })
-        .to({ opacity: 0 }, 200)
-        .onUpdate(function (object) {
-          personalizedWelcome.style.opacity = object.opacity;
-        })
-        .onComplete(function () {
-          personalizedWelcome.style.display = "none";
-          if (onCompleteCallback) onCompleteCallback();
-        })
-        .start();
-    }
+  
     function startPreloader() {
       const preloader = document.getElementById("preloader");
       const preloaderBackground = document.getElementById("preloader-background");
-      const mainContainer = document.getElementById("main-container");
       const experienceIframe = document.getElementById("experience-iframe");
+      const mainContainer = document.getElementById("main-container");
+      preloader.style.display = "flex";
+      mainContainer.style.display = "none";
+      preloaderBackground.style.opacity = 1;
+      preloaderBackground.style.zIndex = 9000;
+      preloader.style.zIndex = 9999;
+      experienceIframe.style.zIndex = "-1"; // Ensure iframe doesn't interfere initially
   
-      fadeOutPersonalizedWelcome(() => {
-        preloader.style.display = "flex";
-        preloaderBackground.style.opacity = 1;
-        preloaderBackground.style.zIndex = 9000;
-        preloader.style.zIndex = 9999;
+      const waves = document.querySelectorAll('.wave');
+      let progress = 0;
   
-        const waves = document.querySelectorAll('.wave');
-        let progress = 0;
-  
-        const interval = setInterval(() => {
-          if (progress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              new TWEEN.Tween({ opacity: 1 })
-                .to({ opacity: 0 }, 1000)
-                .onUpdate(function (object) {
-                  preloader.style.opacity = object.opacity;
-                  preloaderBackground.style.opacity = object.opacity;
-                  mainContainer.style.opacity = object.opacity;
-                })
-                .onComplete(function () {
-                  preloader.style.display = "none"; // Hide the preloader after the animation
-                  experienceIframe.style.opacity = 1;
-                })
-                .start();
-            }, 10000); // Increase the delay to 8 seconds
-          } else {
-            progress += 1.25;
-            waves.forEach(wave => {
-              wave.style.height = progress + '%';
-            });
-          }
-        }, 100);
-      });
+      const interval = setInterval(() => {
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            new TWEEN.Tween({ opacity: 1 })
+              .to({ opacity: 0 }, 1000)
+              .onUpdate(function (object) {
+                preloader.style.opacity = object.opacity;
+                preloaderBackground.style.opacity = object.opacity;
+              })
+              .onComplete(function () {
+                preloader.style.display = "none"; // Hide the preloader after the animation
+                experienceIframe.style.opacity = 1;
+                experienceIframe.style.zIndex = "10000"; // Bring iframe to the front
+              })
+              .start();
+          }, 10000); // Delay for preloader animation
+        } else {
+          progress += 1.25;
+          waves.forEach(wave => {
+            wave.style.height = progress + '%';
+          });
+        }
+      }, 100);
     }
+  
+    // Call startPreloader function if needed right after it's defined or based on a specific event
   </script>
+  
 </body>
 
 </html>
