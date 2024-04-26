@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <title>Welcome to Our Digital Frontier</title>
@@ -16,11 +15,10 @@
       color: white;
       font-family: "Victor Mono", monospace;
     }
-
     #smiley {
       font-size: 54pt;
     }
-
+    
     input,
     textarea {
       font-size: 22px;
@@ -34,29 +32,67 @@
       color: white;
       border-radius: 5px;
       transition: border-color 0.25s ease, box-shadow 0.25s ease;
-
-      &:focus {
-        outline: 0;
-        border-color: rgba(15, 165, 60, 1);
-        box-shadow: 0 0 0 2px rgba(15, 165, 60, 0.5);
-      }
     }
-
+    
+    input:focus,
+    textarea:focus {
+      outline: 0;
+      border-color: rgba(15, 165, 60, 1);
+      box-shadow: 0 0 0 2px rgba(15, 165, 60, 0.5);
+    }
+    
     #main-container {
       position: relative;
       width: 100%;
       height: 100%;
     }
-
+    
     #narrative {
       position: absolute;
       width: 75%;
       height: 80%;
       top: 20%;
       left: 10%;
-      z-index: 3;
+      z-index: 13;
+    }
+    #personalized-welcome{
+      position: absolute;
+      width: 100%;
+      height: 80%;
+      top: 200px;
+      left: -100px;
+      display: none;
+      justify-content: center;
+      align-items: left;
+      font-size: 24pt;
+      color: white;
+      z-index: 11;
+    
     }
 
+
+.note-part:first-child {
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 80%;
+  top: 450px;
+  left: 225px;
+  font-size: 24pt;
+  opacity: 0;
+  margin-top: 50px;
+}
+.note-part:last-child {
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 80%;
+  top: 550px;
+  left: 225px;
+  font-size: 24pt;
+  opacity: 0;
+  margin-top: 50px;
+}
     .narrative-part {
       display: none;
       height: 50px;
@@ -64,19 +100,19 @@
       opacity: 0;
       margin: 35px;
     }
-    .narrative-part>p{
-        margin-top:75px;
-        line-height:2;
+    
+     .note-part {
+      margin-top: 175px;
+      line-height: 2;
     }
-
+    
     canvas {
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 1;
-      opacity: 0.7;
+      z-index: 10;
     }
-
+  
     #preloader {
       position: fixed;
       top: 0;
@@ -84,12 +120,26 @@
       width: 100%;
       height: 100%;
       display: none;
-      flex-direction: column; /* Organize children in a column */
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 9999;
+      pointer-events: none;
     }
-
+  
+    #preloader-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 1s ease;
+      pointer-events: none;
+    }
+    
     .cube {
       width: 150px;
       height: 150px;
@@ -97,9 +147,9 @@
       transform-style: preserve-3d;
       animation: rotateCube 20s infinite linear;
       display: block;
-      margin-bottom: 20px; /* Add some space below the cube */
+      margin-bottom: 20px;
     }
-
+    
     .cube .face {
       position: absolute;
       width: 150px;
@@ -109,31 +159,31 @@
       opacity: 0.8;
       overflow: hidden;
     }
-
+    
     .front {
       transform: translateZ(75px);
     }
-
+    
     .back {
       transform: rotateY(180deg) translateZ(75px);
     }
-
+    
     .right {
       transform: rotateY(90deg) translateZ(75px);
     }
-
+    
     .left {
       transform: rotateY(-90deg) translateZ(75px);
     }
-
+    
     .top {
       transform: rotateX(90deg) translateZ(75px);
     }
-
+    
     .bottom {
       transform: rotateX(-90deg) translateZ(75px);
     }
-
+    
     .wave {
       position: absolute;
       width: 100%;
@@ -141,7 +191,7 @@
       bottom: 0;
       transition: height 1s ease;
     }
-
+    
     .wave::before {
       content: "";
       position: absolute;
@@ -154,7 +204,7 @@
       background: rgba(255, 255, 255, 0.8);
       animation: wave 5s linear infinite;
     }
-
+    
     @keyframes wave {
       0% {
         transform: translate(-50%, -75%) rotate(0deg);
@@ -163,7 +213,7 @@
         transform: translate(-50%, -75%) rotate(360deg);
       }
     }
-
+    
     @keyframes rotateCube {
       from {
         transform: rotateX(0deg) rotateY(0deg);
@@ -173,21 +223,10 @@
       }
     }
 
-    #preloader-background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: black;
-      opacity: 0;
-      z-index: 1;
-      transition: opacity 1s ease;
-    }
-    #personalized-welcome {
+    #extended-note {
       position: absolute;
-      top: 20%;
-      left: 25%;
+      top: -20%;
+      left: 5%;
       width: 100%;
       height: 100%;
       display: none;
@@ -195,30 +234,36 @@
       align-items: center;
       font-size: 24pt;
       color: white;
+      z-index: 11;
     }
-
+    
     .loading_text {
-      display: flex; /* Use flexbox to layout the text and dots */
-      align-items: center; /* Center the items vertically */
-      justify-content: center; 
-      margin-top: 50px;/* Center the content horizontally */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin-top: 50px;
+      width: 100%;
     }
     
     .loading_dots {
       display: inline-block;
-      width: 30px; /* Reserve space for the dots */
-      text-align: left; /* Align the dots to the left */
-      animation: loadingDots 1.5s infinite step-start; /* Adjust animation */
+      width: 300px;
+      text-align: center;
+      animation: loadingDots 1.5s infinite step-start;
     }
     
     @keyframes loadingDots {
-      0%, 20% {
+      0%,
+      20% {
         content: ".";
       }
-      40%, 60% {
+      40%,
+      60% {
         content: "..";
       }
-      80%, 100% {
+      80%,
+      100% {
         content: "...";
       }
     }
@@ -229,34 +274,52 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: -1; /* Initially set to -1 to prevent interference */
+      z-index: -1;
       opacity: 0;
-      transition: opacity 1s ease, z-index 0s ease 1s; /* Add transition for z-index if needed */
+      transition: opacity 1s ease, z-index 0s ease 1s;
     }
-    
-    
   </style>
 </head>
-
 <body>
   <div id="preloader">
     <div class="cube">
-      <div class="face front"><div class="wave" style="background-color: #ff0000;"></div></div>
-      <div class="face back"><div class="wave" style="background-color: #00ff00;"></div></div>
-      <div class="face right"><div class="wave" style="background-color: #0000ff;"></div></div>
-      <div class="face left"><div class="wave" style="background-color: #ffff00;"></div></div>
-      <div class="face top"><div class="wave" style="background-color: #ff00ff;"></div></div>
-      <div class="face bottom"><div class="wave" style="background-color: #00ffff;"></div></div>
+      <div class="face front">
+        <div class="wave" style="background-color: #ff0000;"></div>
+      </div>
+      <div class="face back">
+        <div class="wave" style="background-color: #00ff00;"></div>
+      </div>
+      <div class="face right">
+        <div class="wave" style="background-color: #0000ff;"></div>
+      </div>
+      <div class="face left">
+        <div class="wave" style="background-color: #ffff00;"></div>
+      </div>
+      <div class="face top">
+        <div class="wave" style="background-color: #ff00ff;"></div>
+      </div>
+      <div class="face bottom">
+        <div class="wave" style="background-color: #00ffff;"></div>
+      </div>
     </div>
     <p class="loading_text">loading<span class="loading_dots"></span></p>
-
   </div>
   <div id="preloader-background"></div>
   <div id="personalized-welcome">
     Thank you, <span id="userNameDisplay"></span>. Get ready to explore our world of innovation!
   </div>
+  <div id="extended-note">
+    <div class="note-part">
+      We're about to take you on a journey to see our creative coding.
+    </div>
+    <div class="note-part">
+      When you click launch you will be able to interact with a living, breathing 6 sided cube. To interact with it,
+      please.....ready?!?
+    </div>
+  </div>
+  <canvas id="matrix-rain-canvas"></canvas>
   <div id="main-container">
-    <canvas id="matrix-rain-canvas"></canvas>
+    
     <div id="narrative">
       <div class="narrative-part">
         Welcome to APT! Your Behind-the-Scenes Coding Powerhouse.
@@ -270,31 +333,33 @@
         <span id="smiley">&#9786;</span> you will thank us later!
         <input type="text" id="userName" maxlength="3" />
       </div>
-     
     </div>
   </div>
   <iframe id="experience-iframe" src="experience.html"></iframe>
   <script>
+    const mainContainer = document.getElementById("main-container");
     const canvas = document.getElementById("matrix-rain-canvas");
     const ctx = canvas.getContext("2d");
     let isNamed = false;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-  
     let charset = "<A P T / >".split("");
-      document.addEventListener('click', function(event) {
-        console.log('Clicked element:', event.target);
-        console.log('Clicked element ID:', event.target.id);
-        console.log('Clicked element classes:', event.target.className);
-      }, true);
-      function animateLoadingDots() {
-        const dots = document.querySelector('.loading_dots');
-        let dotCount = 0;
-        setInterval(() => {
-          dotCount = (dotCount % 3) + 1; // Cycle dotCount from 1 to 3
-          dots.textContent = '.'.repeat(dotCount); // Set the textContent of the span to one, two, or three dots
-        }, 500); // Adjust the interval time as needed
-      }
+  
+    document.addEventListener('click', function (event) {
+      console.log('Clicked element:', event.target);
+      console.log('Clicked element ID:', event.target.id);
+      console.log('Clicked element classes:', event.target.className);
+    }, true);
+  
+    function animateLoadingDots() {
+      const dots = document.querySelector('.loading_dots');
+      let dotCount = 0;
+      setInterval(() => {
+        dotCount = (dotCount % 3) + 1;
+        dots.textContent = '.'.repeat(dotCount);
+      }, 500);
+    }
+  
     function getCharset() {
       const storedName = localStorage.getItem("userName");
       return isNamed && storedName ? storedName.split("") : "<A P T / >".split("");
@@ -321,43 +386,68 @@
         drops[i]++;
       }
     }
+  
     setInterval(drawMatrixRain, 50);
   
     window.onload = function () {
       animateLoadingDots();
       const userNameInput = document.getElementById("userName");
       let narrativeParts = document.querySelectorAll(".narrative-part");
+      let noteParts = document.querySelectorAll(".note-part");
   
-      function fadeInElement(index, onCompleteCallback) {
-        narrativeParts[index].style.display = "block";
+      // Function to fade in elements
+      function fadeInElement(index, onCompleteCallback, elements) {
+        elements[index].style.display = "block";
         let tween = new TWEEN.Tween({ opacity: 0 })
-          .to({ opacity: 1 }, 1200)
+          .to({ opacity: 1 }, 600)
           .onUpdate(function (object) {
-            narrativeParts[index].style.opacity = object.opacity;
+            elements[index].style.opacity = object.opacity;
           })
           .onComplete(function () {
-            if (index === 2) {
-              userNameInput.focus();
-            }
             if (onCompleteCallback) onCompleteCallback();
           })
           .start();
       }
   
-      setTimeout(function () {
-        fadeInElement(0, () => fadeInElement(1, () => fadeInElement(2)));
-      }, 500);
-      userNameInput.addEventListener("click", function (event) {
-        event.stopPropagation();
-      });
+      // Sequence the initial narrative parts
+      function sequenceNarrativeParts() {
+        fadeInElement(0, () => {
+          setTimeout(() => {
+            fadeInElement(1, () => {
+              setTimeout(() => {
+                fadeInElement(2, null, narrativeParts);
+              }, 500);
+            }, narrativeParts);
+          }, 500);
+        }, narrativeParts);
+      }
+  
+      // Initialize narrative part animations
+      setTimeout(sequenceNarrativeParts, 500);
+  
+      // Event listener for input change
       userNameInput.addEventListener("input", function () {
         const userName = userNameInput.value;
-        
         if (userName.length === 3) {
-            localStorage.setItem("userName", userName);
-          startPreloader();
+          localStorage.setItem("userName", userName);
           document.getElementById("userNameDisplay").textContent = userName;
+          new TWEEN.Tween({ opacity: 1 })
+            .to({ opacity: 0 }, 500)
+            .onUpdate(function (object) {
+              mainContainer.style.opacity = object.opacity;
+            })
+            .onComplete(function () {
+              mainContainer.style.display = "none";
+              fadeInElement(0, () => {
+                fadeInElement(1, startPreloader, noteParts);
+              }, noteParts);
+            })
+            .start();
         }
+      });
+  
+      userNameInput.addEventListener("click", function (event) {
+        event.stopPropagation();
       });
   
       function animate(time) {
@@ -372,49 +462,84 @@
       const preloader = document.getElementById("preloader");
       const preloaderBackground = document.getElementById("preloader-background");
       const experienceIframe = document.getElementById("experience-iframe");
-      const mainContainer = document.getElementById("main-container");
-      preloader.style.display = "flex";
-      mainContainer.style.display = "none";
-      preloaderBackground.style.opacity = 1;
-      preloaderBackground.style.zIndex = 9000;
-      preloader.style.zIndex = 9999;
-      experienceIframe.style.zIndex = -1;
-      personalizedWelcome.style.zIndex = 10000;
-      personalizedWelcome.style.display="block"; // Ensure iframe doesn't interfere initially
-  
-      const waves = document.querySelectorAll('.wave');
-      let progress = 0;
-  
-      const interval = setInterval(() => {
-        if (progress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            new TWEEN.Tween({ opacity: 1 })
-              .to({ opacity: 0 }, 1000)
-              .onUpdate(function (object) {
-                preloader.style.opacity = object.opacity;
-                preloaderBackground.style.opacity = object.opacity;
-              })
-              .onComplete(function () {
-                personalizedWelcome.style.zIndex = -1;
-                preloader.style.display = "none"; // Hide the preloader after the animation
-                experienceIframe.style.opacity = 1;
-                experienceIframe.style.zIndex = "10000"; // Bring iframe to the front
-              })
-              .start();
-          }, 10000); // Delay for preloader animation
-        } else {
-          progress += 1.25;
-          waves.forEach(wave => {
-            wave.style.height = progress + '%';
-          });
-        }
-      }, 100);
+      const extendedNote = document.getElementById("extended-note");
+      const narrative = document.getElementById("narrative");
+      const noteParts = document.querySelectorAll(".note-part");
+    
+      // Initially hide elements that will be animated in
+      narrative.style.display = "none";
+      personalizedWelcome.style.display = "flex";
+      personalizedWelcome.style.opacity = 0;
+      extendedNote.style.display = "flex";
+      noteParts.forEach(part => {
+        part.style.display = "block";
+        part.style.opacity = 0;
+      });
+    
+      new TWEEN.Tween({ opacity: 0 })
+        .to({ opacity: 1 }, 1000)
+        .onUpdate(function (object) {
+          personalizedWelcome.style.opacity = object.opacity;
+        })
+        .onComplete(function () {
+          new TWEEN.Tween({ opacity: 0 })
+            .to({ opacity: 1 }, 1000)
+            .onUpdate(function (object) {
+              noteParts[0].style.opacity = object.opacity;
+            })
+            .onComplete(function () {
+              new TWEEN.Tween({ opacity: 0 })
+                .to({ opacity: 1 }, 1000)
+                .onUpdate(function (object) {
+                  noteParts[1].style.opacity = object.opacity;
+                })
+                .onComplete(function () {
+                  // Fade out all content before showing preloader
+                  new TWEEN.Tween({ opacity: 1 })
+                    .to({ opacity: 0 }, 1000)
+                    .onUpdate(function (object) {
+                      personalizedWelcome.style.opacity = object.opacity;
+                      noteParts[0].style.opacity = object.opacity;
+                      noteParts[1].style.opacity = object.opacity;
+                    })
+                    .onComplete(function () {
+                      personalizedWelcome.style.display = "none";
+                      extendedNote.style.display = "none";
+                      preloader.style.display = "flex";
+    
+                      const waves = document.querySelectorAll('.wave');
+                      const loadingText = document.querySelector('.loading_text');
+                      let progress = 0;
+    
+                      const interval = setInterval(() => {
+                        progress += 1;
+                        loadingText.innerHTML = `<span class="loading_dots" style="display: inline;">${progress}% loaded</span>`;
+                        waves.forEach(wave => {
+                          wave.style.height = progress + '%';
+                        });
+    
+                        if (progress >= 100) {
+                          clearInterval(interval);
+                          setTimeout(function () {
+                            preloader.style.display = "none";
+                            preloaderBackground.style.opacity = 0;
+                            experienceIframe.style.opacity = 1;
+                            experienceIframe.style.zIndex = 10000;
+                            experienceIframe.src = "experience.html";
+                          }, 1000); // Delay hiding the preloader and showing the iframe by 1 second
+                        }
+                      }, 130);
+                    })
+                    .start();
+                })
+                .start();
+            })
+            .start();
+        })
+        .start();
     }
-  
-    // Call startPreloader function if needed right after it's defined or based on a specific event
+    
   </script>
   
-</body>
-
-</html>
+  
+</body></html>
