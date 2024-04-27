@@ -14,6 +14,7 @@
       background-color: black;
       color: white;
       font-family: "Victor Mono", monospace;
+      overflow: hidden !important;
     }
     #smiley {
       font-size: 54pt;
@@ -59,8 +60,8 @@
       position: absolute;
       width: 100%;
       height: 80%;
-      top: 200px;
-      left: -100px;
+      top: 175px;
+      left: 75px;
       display: none;
       justify-content: center;
       align-items: left;
@@ -74,10 +75,10 @@
 .note-part:first-child {
   display: none;
   position: absolute;
-  width: 100%;
+  width: 80%;
   height: 80%;
-  top: 450px;
-  left: 225px;
+  top: 340px;
+  left: 105px;
   font-size: 24pt;
   opacity: 0;
   margin-top: 50px;
@@ -85,10 +86,10 @@
 .note-part:last-child {
   display: none;
   position: absolute;
-  width: 100%;
+  width: 75%;
   height: 80%;
-  top: 550px;
-  left: 225px;
+  top: 450px;
+  left: 105px;
   font-size: 24pt;
   opacity: 0;
   margin-top: 50px;
@@ -98,13 +99,15 @@
       height: 50px;
       font-size: 24pt;
       opacity: 0;
-      margin: 35px;
+      margin-top: 35px;
     }
-    
-     .note-part {
-      margin-top: 175px;
-      line-height: 2;
+    #narrative-one{
+   margin-top: 50px;
     }
+    #narrative-two{
+      margin-top: 30px;
+       }
+
     
     canvas {
       position: fixed;
@@ -302,7 +305,7 @@
         <div class="wave" style="background-color: #00ffff;"></div>
       </div>
     </div>
-    <p class="loading_text">loading<span class="loading_dots"></span></p>
+    <p class="loading_text"><span class="loading_dots"></span></p>
   </div>
   <div id="preloader-background"></div>
   <div id="personalized-welcome">
@@ -313,8 +316,7 @@
       We're about to take you on a journey to see our creative coding.
     </div>
     <div class="note-part">
-      When you click launch you will be able to interact with a living, breathing 6 sided cube. To interact with it,
-      please.....ready?!?
+      Soon, you'll be able to engage with a dynamic cube—just a brief wait and you can explore its exciting features
     </div>
   </div>
   <canvas id="matrix-rain-canvas"></canvas>
@@ -324,11 +326,11 @@
       <div class="narrative-part">
         Welcome to APT! Your Behind-the-Scenes Coding Powerhouse.
       </div>
-      <div class="narrative-part">
+      <div class="narrative-part" id="narrative-one">
         Embark on a journey tailored to your curiosity and professional
         interests.
       </div>
-      <div class="narrative-part">
+      <div class="narrative-part" id="narrative-two">
         Please enter your name (only 3 characters please)
         <span id="smiley">&#9786;</span> you will thank us later!
         <input type="text" id="userName" maxlength="3" />
@@ -404,6 +406,7 @@
             elements[index].style.opacity = object.opacity;
           })
           .onComplete(function () {
+            if(userNameInput) userNameInput.focus();
             if (onCompleteCallback) onCompleteCallback();
           })
           .start();
@@ -423,28 +426,31 @@
       }
   
       // Initialize narrative part animations
-      setTimeout(sequenceNarrativeParts, 500);
+      setTimeout(sequenceNarrativeParts, 1);
   
       // Event listener for input change
-      userNameInput.addEventListener("input", function () {
+      userNameInput.addEventListener("input", function(event) {
         const userName = userNameInput.value;
         if (userName.length === 3) {
-          localStorage.setItem("userName", userName);
-          document.getElementById("userNameDisplay").textContent = userName;
-          new TWEEN.Tween({ opacity: 1 })
-            .to({ opacity: 0 }, 500)
-            .onUpdate(function (object) {
-              mainContainer.style.opacity = object.opacity;
-            })
-            .onComplete(function () {
-              mainContainer.style.display = "none";
-              fadeInElement(0, () => {
-                fadeInElement(1, startPreloader, noteParts);
-              }, noteParts);
-            })
-            .start();
+          setTimeout(() => { // Delay to allow users to see their input
+            localStorage.setItem("userName", userName);
+            document.getElementById("userNameDisplay").textContent = userName;
+            new TWEEN.Tween({ opacity: 1 })
+              .to({ opacity: 0 }, 500)
+              .onUpdate(function (object) {
+                mainContainer.style.opacity = object.opacity;
+              })
+              .onComplete(function () {
+                mainContainer.style.display = "none";
+                fadeInElement(0, () => {
+                  fadeInElement(1, startPreloader, noteParts);
+                }, noteParts);
+              })
+              .start();
+          }, 1000); // 1-second delay before processing
         }
-      });
+      }
+      );
   
       userNameInput.addEventListener("click", function (event) {
         event.stopPropagation();
@@ -494,43 +500,45 @@
                   noteParts[1].style.opacity = object.opacity;
                 })
                 .onComplete(function () {
-                  // Fade out all content before showing preloader
-                  new TWEEN.Tween({ opacity: 1 })
-                    .to({ opacity: 0 }, 1000)
-                    .onUpdate(function (object) {
-                      personalizedWelcome.style.opacity = object.opacity;
-                      noteParts[0].style.opacity = object.opacity;
-                      noteParts[1].style.opacity = object.opacity;
-                    })
-                    .onComplete(function () {
-                      personalizedWelcome.style.display = "none";
-                      extendedNote.style.display = "none";
-                      preloader.style.display = "flex";
+                  // Delay the fade out to give users time to read
+                  setTimeout(() => {
+                    new TWEEN.Tween({ opacity: 1 })
+                      .to({ opacity: 0 }, 1000)
+                      .onUpdate(function (object) {
+                        personalizedWelcome.style.opacity = object.opacity;
+                        noteParts[0].style.opacity = object.opacity;
+                        noteParts[1].style.opacity = object.opacity;
+                      })
+                      .onComplete(function () {
+                        personalizedWelcome.style.display = "none";
+                        extendedNote.style.display = "none";
+                        preloader.style.display = "flex";
     
-                      const waves = document.querySelectorAll('.wave');
-                      const loadingText = document.querySelector('.loading_text');
-                      let progress = 0;
+                        const waves = document.querySelectorAll('.wave');
+                        const loadingText = document.querySelector('.loading_text');
+                        let progress = 0;
     
-                      const interval = setInterval(() => {
-                        progress += 1;
-                        loadingText.innerHTML = `<span class="loading_dots" style="display: inline;">${progress}% loaded</span>`;
-                        waves.forEach(wave => {
-                          wave.style.height = progress + '%';
-                        });
+                        const interval = setInterval(() => {
+                          progress += 1;
+                          loadingText.innerHTML = `<span class="loading_dots" style="display: inline;">${progress}% loaded</span>`;
+                          waves.forEach(wave => {
+                            wave.style.height = progress + '%';
+                          });
     
-                        if (progress >= 100) {
-                          clearInterval(interval);
-                          setTimeout(function () {
-                            preloader.style.display = "none";
-                            preloaderBackground.style.opacity = 0;
-                            experienceIframe.style.opacity = 1;
-                            experienceIframe.style.zIndex = 10000;
-                            experienceIframe.src = "experience.html";
-                          }, 1000); // Delay hiding the preloader and showing the iframe by 1 second
-                        }
-                      }, 130);
-                    })
-                    .start();
+                          if (progress >= 100) {
+                            clearInterval(interval);
+                            setTimeout(function () {
+                              preloader.style.display = "none";
+                              preloaderBackground.style.opacity = 0;
+                              experienceIframe.style.opacity = 1;
+                              experienceIframe.style.zIndex = 10000;
+                              experienceIframe.src = "experience.html";
+                            }, 1000); // Delay hiding the preloader and showing the iframe by 1 second
+                          }
+                        }, 1);
+                      })
+                      .start();
+                  }, 3000); // 5-second delay before starting the fade out
                 })
                 .start();
             })

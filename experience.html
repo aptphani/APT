@@ -12,9 +12,11 @@
       body {
         margin: 0;
       }
+
       canvas {
         display: block;
       }
+
       #modal {
         display: none;
         position: fixed;
@@ -29,12 +31,14 @@
         padding: 20px;
         overflow: hidden;
       }
+
       #modal > canvas {
         z-index: 1000;
         position: absolute;
         height: 100%;
         width: 100%;
       }
+
       .close-btn {
         position: absolute;
         top: 20px;
@@ -48,30 +52,36 @@
         cursor: pointer;
         border-radius: 5px;
       }
+
       #toast {
         position: fixed;
-        top: -100%; /* Start outside of the screen */
+        top: -100%;
+        /* Start outside of the screen */
         left: 50%;
         transform: translateX(-50%) rotateX(0);
         transform-origin: top;
         background: #ddf1fa;
         padding: 20px;
         border: 1px solid #283593;
-        border-radius: 0 0 15px 15px; /* Only round the bottom corners */
+        border-radius: 0 0 15px 15px;
+        /* Only round the bottom corners */
         box-shadow: 0px 10px 15px lightblue;
         transition: top 0.5s ease-out, transform 0.5s ease-out;
         z-index: 1000;
       }
 
       #toast.open {
-        top: 0; /* Position it back to the top edge of the screen */
-        animation: flapDown 0.5s forwards; /* Trigger the animation */
+        top: 0;
+        /* Position it back to the top edge of the screen */
+        animation: flapDown 0.5s forwards;
+        /* Trigger the animation */
       }
 
       @keyframes flapDown {
         0% {
           transform: rotateX(-90deg);
         }
+
         100% {
           transform: rotateX(0deg);
         }
@@ -156,9 +166,11 @@
           body {
             margin: 0;
           }
+
           canvas {
             display: block;
           }
+
           #modal {
             display: none;
             position: fixed;
@@ -173,12 +185,14 @@
             padding: 20px;
             overflow: hidden;
           }
+
           #modal > canvas {
             z-index: 1000;
             position: absolute;
             height: 100%;
             width: 100%;
           }
+
           .close-btn {
             position: absolute;
             top: 20px;
@@ -192,8 +206,10 @@
             cursor: pointer;
             border-radius: 5px;
           }
+
           #toast {
             position: fixed;
+            display: none;
             top: -100%;
             left: 50%;
             transform: translateX(-50%) rotateX(0);
@@ -217,6 +233,7 @@
             0% {
               transform: rotateX(-90deg);
             }
+
             100% {
               transform: rotateX(0deg);
             }
@@ -286,6 +303,7 @@
           .button:focus {
             outline: 0;
           }
+
           /* #loading {
       position: fixed;
       top: 0;
@@ -307,9 +325,15 @@
       </head>
 
       <body>
-        <!-- <div id="loading">
-          <div id="loading-text">Loading...</div>
-        </div> -->
+        <div id="toast">
+          <span
+            class="close"
+            onclick="document.getElementById('toast').style.display='none';"
+            >&times;</span
+          >
+          Drag the cube to rotate it.<br />Double-click a face to experience an
+          animation pattern.
+        </div>
 
         <button
           id="homeButton"
@@ -330,23 +354,14 @@
           style="
             position: absolute;
             top: 20px;
-            left: 15%;
+            left: 20%;
             z-index: 10;
             user-select: none;
           "
         >
-          Explore
+          About Us
         </button>
 
-        <div id="toast">
-          <span
-            class="close"
-            onclick="document.getElementById('toast').style.display='none';"
-            >&times;</span
-          >
-          Drag the cube to rotate it.<br />Double-click a face to experience an
-          animation pattern.
-        </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
         <script type="importmap">
           {
@@ -360,12 +375,6 @@
         <script type="module">
           import * as THREE from "three";
           import TWEEN from "tween";
-          import { FrontFaceAnimation } from "./scripts/FrontFaceAnimation.js";
-          import { BackFaceAnimation } from "./scripts/BackFaceAnimation.js";
-          import { RightFaceAnimation } from "./scripts/RightFaceAnimation.js";
-          import { LeftFaceAnimation } from "./scripts/LeftFaceAnimation.js";
-          import { TopFaceAnimation } from "./scripts/TopFaceAnimation.js";
-          import { BottomFaceAnimation } from "./scripts/BottomFaceAnimation.js";
 
           const scene = new THREE.Scene();
           const camera = new THREE.PerspectiveCamera(
@@ -376,27 +385,155 @@
           );
           const renderer = new THREE.WebGLRenderer({ antialias: true });
           renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.shadowMap.enabled = true;
           document.body.appendChild(renderer.domElement);
 
-          // Creating a basic cube
-          const geometry = new THREE.BoxGeometry();
-          const material = new THREE.MeshBasicMaterial({
-            color: 0x00ff00,
-            wireframe: true,
-          });
-          const cube = new THREE.Mesh(geometry, material);
-          scene.add(cube);
-          camera.position.z = 5;
+          const faceNames = ["front", "back", "top", "bottom", "right", "left"];
+          const videoPaths = [
+            "Video1.mp4",
+            "Video6.mp4",
+            "Video2.mp4",
+            "Video3.mp4",
+            "Video4.mp4",
+            "Video5.mp4",
+          ];
+          const videoTextures = [];
+          let cube;
+          let totalVideos = videoPaths.length;
+          let loadedVideos = 0;
 
-          // Interaction listeners
-          window.addEventListener("resize", onWindowResize, false);
-          function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+          function preloadVideoTextures(paths, onComplete) {
+            paths.forEach((path, index) => {
+              const video = document.createElement("video");
+              video.src = path;
+              video.loop = true;
+              video.muted = true;
+              video.crossOrigin = "anonymous";
+              video.addEventListener("loadedmetadata", () => {
+                const texture = new THREE.VideoTexture(video);
+                videoTextures[index] = texture;
+                loadedVideos++;
+
+                if (loadedVideos === totalVideos) {
+                  onComplete();
+                }
+              });
+            });
           }
 
-          document.addEventListener("click", function (event) {
+          function createCube() {
+            const planeGeometry = new THREE.PlaneGeometry(4, 4);
+            cube = new THREE.Group();
+
+            videoTextures.forEach((texture, index) => {
+              const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.DoubleSide,
+              });
+              const plane = new THREE.Mesh(planeGeometry, material);
+              plane.name = faceNames[index];
+              cube.add(plane);
+            });
+            arrangeCubeFaces(cube.children);
+            scene.add(cube);
+            showToast();
+
+            cube.position.set(0, 15, 40);
+            camera.position.set(0, 15, 50);
+
+            // Attach interaction events after the cube is created
+            document.addEventListener("mousedown", onMouseDown);
+            document.addEventListener("mousemove", onMouseMove);
+            document.addEventListener("mouseup", onMouseUp);
+            document.addEventListener("click", onClick);
+          }
+
+          function arrangeCubeFaces(children) {
+            children[0].position.set(0, 0, -2);
+            children[0].rotation.y = Math.PI;
+            children[1].position.set(0, 0, 2);
+            children[2].position.set(0, 2, 0);
+            children[2].rotation.x = -Math.PI / 2;
+            children[3].position.set(0, -2, 0);
+            children[3].rotation.x = Math.PI / 2;
+            children[4].position.set(2, 0, 0);
+            children[4].rotation.y = Math.PI / 2;
+            children[5].position.set(-2, 0, 0);
+            children[5].rotation.y = -Math.PI / 2;
+          }
+
+          const raycaster = new THREE.Raycaster();
+          const mouse = new THREE.Vector2();
+          let isDragging = false;
+          let candrag = true;
+          let previousMousePosition = { x: 0, y: 0 };
+          let lastClickTime = 0;
+          let rotationSpeed = 0.005;
+
+          setupLighting();
+          createFloor();
+          //const instructionPlane = createInstructionPlane();
+          animate();
+
+          //scene.add(instructionPlane);
+
+          function createInstructionPlane() {
+            const planeWidth = 10;
+            const planeHeight = 2;
+            const planeGeometry = new THREE.PlaneGeometry(
+              planeWidth,
+              planeHeight
+            );
+            const instructionTexture = createInstructionTexture();
+            const planeMaterial = new THREE.MeshBasicMaterial({
+              map: instructionTexture,
+              transparent: true,
+              side: THREE.DoubleSide,
+            });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+            const distance = 30;
+            const cameraDirection = new THREE.Vector3();
+            camera.getWorldDirection(cameraDirection);
+            cameraDirection.multiplyScalar(distance);
+            plane.position.copy(camera.position).add(cameraDirection);
+
+            plane.lookAt(camera.position);
+
+            return plane;
+          }
+
+          //var instructionVisible = true;
+          document.addEventListener("click", function () {
+            //instructionVisible = false;
+            //instructionPlane.visible = false;
+          });
+
+          function onMouseDown(event) {
+            isDragging = true;
+            previousMousePosition.x = event.clientX;
+            previousMousePosition.y = event.clientY;
+          }
+
+          function onMouseMove(event) {
+            if (isDragging && candrag && cube) {
+              const deltaMove = {
+                x: event.clientX - previousMousePosition.x,
+                y: event.clientY - previousMousePosition.y,
+              };
+              const rotateAngleX = ((deltaMove.y * Math.PI) / 180) * 0.5;
+              const rotateAngleY = ((deltaMove.x * Math.PI) / 180) * 0.5;
+              cube.rotation.x += rotateAngleX;
+              cube.rotation.y += rotateAngleY;
+              previousMousePosition = { x: event.clientX, y: event.clientY };
+            }
+          }
+
+          function onMouseUp() {
+            isDragging = false;
+          }
+
+          function onClick(event) {
             if (!isDragging && cube) {
               mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
               mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -421,44 +558,56 @@
                 }
               }
             }
-          });
+          }
+
+          function setupLighting() {
+            const spotLight = new THREE.SpotLight(0xffffff, 1);
+            spotLight.position.set(0, 20, 20);
+            spotLight.angle = Math.PI / 2;
+            spotLight.penumbra = 0.1;
+            spotLight.decay = 0;
+            spotLight.distance = 1000;
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+          }
+
+          function createFloor() {
+            const floorGeometry = new THREE.PlaneGeometry(200, 200);
+            const floorMaterial = new THREE.MeshStandardMaterial({
+              color: 0xf7f5da,
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -5;
+            floor.receiveShadow = true;
+            scene.add(floor);
+          }
 
           function animate() {
+            if (!isDragging && cube) {
+              cube.rotation.x += rotationSpeed;
+              cube.rotation.y += rotationSpeed;
+              //instructionPlane.lookAt(camera.position);
+            }
+            //instructionPlane.visible = instructionVisible;
             requestAnimationFrame(animate);
             TWEEN.update();
             renderer.render(scene, camera);
           }
-          animate();
 
-          function showModal(faceName, cube) {
-            let animation;
-            switch (faceName) {
-              case "front":
-                animation = new FrontFaceAnimation("frontFaceCanvas");
-                break;
-              case "back":
-                animation = new BackFaceAnimation("backFaceCanvas");
-                break;
-              case "right":
-                animation = new RightFaceAnimation("rightFaceCanvas");
-                break;
-              case "left":
-                animation = new LeftFaceAnimation("leftFaceCanvas");
-                break;
-              case "top":
-                animation = new TopFaceAnimation("topFaceCanvas");
-                break;
-              case "bottom":
-                animation = new BottomFaceAnimation("bottomFaceCanvas");
-                break;
-            }
-            if (animation) {
-              animation.init();
-              animation.start();
-            }
+          preloadVideoTextures(videoPaths, () => {
+            //document.getElementById("loading").style.display = "none";
+            createCube();
+          });
+
+          window.addEventListener("resize", onWindowResize);
+
+          function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
           }
         </script>
-
         <script src="https://cdn.babylonjs.com/babylon.js"></script>
         <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
         <script>
@@ -472,7 +621,6 @@
             closeBtn.onclick = function () {
               toast.style.display = "none";
             };
-            toast.style.display = "block";
           }
           document.addEventListener("DOMContentLoaded", function () {
             const exploreButton = document.getElementById("exploreButton"); // Make sure you have an element with id 'exploreButton'
@@ -487,14 +635,14 @@
             });
           });
 
-          window.onload = function () {
+          function showToast() {
             const toast = document.getElementById("toast");
-            // Wait for the page to load before showing the toast
+
             setTimeout(() => {
               toast.classList.add("open");
-            }, 5000);
-          };
-
+              toast.style.display = "block";
+            }, 200);
+          }
           function showModal(faceName, cube) {
             var modal = document.createElement("div");
             modal.id = "modal";
@@ -552,7 +700,6 @@
               });
             }
           }
-
           function initializeFrontFaceAnimation(canvasId) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) {
@@ -562,21 +709,19 @@
             const ctx = canvas.getContext("2d");
             canvas.width = window.innerWidth * 0.98; // Adjusted to match modal canvas width
             canvas.height = window.innerHeight * 0.45; // Adjusted to match modal canvas height
-
+    
             let particlePositions = [];
             let particles = [];
-            const letters = localStorage.getItem("userName")
-              ? localStorage.getItem("userName")
-              : "<APT/>";
+            const letters = localStorage.getItem("userName") ? localStorage.getItem("userName") :"<APT/>";
             let currentPos = 0;
             let W = canvas.width;
             let H = canvas.height;
-
+    
             function Particle(x, y) {
               this.x = x;
               this.y = y;
               this.radius = 3;
-
+    
               this.draw = function () {
                 ctx.save();
                 ctx.translate(this.x, this.y);
@@ -587,12 +732,12 @@
                 ctx.restore();
               };
             }
-
+    
             function changeLetter() {
               time = letters[currentPos];
               currentPos = (currentPos + 1) % letters.length;
             }
-
+    
             function makeParticles(num) {
               for (let i = 0; i <= num; i++) {
                 particles.push(
@@ -603,15 +748,15 @@
                 );
               }
             }
-
+    
             function getPixels() {
               const keyword = letters[currentPos],
                 gridX = 5,
                 gridY = 5;
-
+    
               const tmpCanvas = document.createElement("canvas"),
                 tmpCtx = tmpCanvas.getContext("2d");
-
+    
               tmpCanvas.width = W;
               tmpCanvas.height = H;
               tmpCtx.fillStyle = "red";
@@ -622,7 +767,7 @@
                 W / 2 - tmpCtx.measureText(keyword).width / 1.5,
                 H / 2 + textHeight / 4
               );
-
+    
               const idata = tmpCtx.getImageData(
                   0,
                   0,
@@ -630,7 +775,7 @@
                   tmpCanvas.height
                 ),
                 buffer32 = new Uint32Array(idata.data.buffer);
-
+    
               particlePositions = [];
               for (let y = 0; y < tmpCanvas.height; y += gridY) {
                 for (let x = 0; x < tmpCanvas.width; x += gridX) {
@@ -640,7 +785,7 @@
                 }
               }
             }
-
+    
             function animateParticles() {
               for (let i = 0, num = particles.length; i < num; i++) {
                 const p = particles[i],
@@ -652,20 +797,20 @@
                 }
               }
             }
-
+    
             function animate() {
               requestAnimationFrame(animate);
               ctx.fillStyle = "rgba(9, 5, 77, 1)";
               ctx.fillRect(0, 0, W, H);
               animateParticles();
             }
-
+    
             // Initialize the animation
             setInterval(() => {
               changeLetter();
               getPixels();
             }, 900);
-
+    
             makeParticles(10000);
             animate();
           }
@@ -695,11 +840,9 @@
               "#FF8C00", // Dark Orange
               "#9400D3", // Dark Violet
             ];
-
-            const userName = localStorage.getItem("userName")
-              ? localStorage.getItem("userName")
-              : "<APT/>";
-
+    
+            const userName = localStorage.getItem("userName") ? localStorage.getItem("userName") :"<APT/>";
+    
             class Particle {
               constructor(effect, x, y) {
                 this.effect = effect;
@@ -707,7 +850,7 @@
                 this.y = Math.random() * this.effect.canvasHeight;
                 this.originX = Math.floor(x);
                 this.originY = Math.floor(y);
-                this.size = Math.random() * 5 + 5;
+                this.size = Math.random() * 2 + 1;
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 this.dx = 0;
                 this.dy = 0;
@@ -730,26 +873,18 @@
                   this.vy += this.force * Math.sin(this.angle);
                 }
                 this.x +=
-                  (this.vx *= this.friction) +
-                  (this.originX - this.x) * this.ease;
+                  (this.vx *= this.friction) + (this.originX - this.x) * this.ease;
                 this.y +=
-                  (this.vy *= this.friction) +
-                  (this.originY - this.y) * this.ease;
+                  (this.vy *= this.friction) + (this.originY - this.y) * this.ease;
               }
               draw() {
                 this.effect.context.fillStyle = this.color;
                 this.effect.context.beginPath();
-                this.effect.context.arc(
-                  this.x,
-                  this.y,
-                  this.size,
-                  0,
-                  2 * Math.PI
-                );
+                this.effect.context.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
                 this.effect.context.fill();
               }
             }
-
+    
             class Effect {
               constructor(context, canvasWidth, canvasHeight) {
                 this.context = context;
@@ -805,883 +940,607 @@
                 }
               }
               render() {
-                this.context.clearRect(
-                  0,
-                  0,
-                  this.canvasWidth,
-                  this.canvasHeight
-                );
+                this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
                 this.particles.forEach((particle) => {
                   particle.update();
                   particle.draw();
                 });
               }
             }
-
+    
             let effect = new Effect(ctx, canvas.width, canvas.height);
-
+    
             function animate() {
               effect.render();
               requestAnimationFrame(animate);
             }
             animate();
-
+    
             window.addEventListener("resize", function () {
               canvas.width = window.innerWidth;
               canvas.height = window.innerHeight;
               effect = new Effect(ctx, canvas.width, canvas.height);
               effect.wrapText(userName); // Re-generate text and particles for new dimensions
             });
+            function getPixels() {
+              const keyword = letters[currentPos],
+                gridX = 5,
+                gridY = 5;
+            
+              const tmpCanvas = document.createElement("canvas"),
+                tmpCtx = tmpCanvas.getContext("2d");
+            
+              tmpCanvas.width = canvas.width;
+              tmpCanvas.height = canvas.height;
+            }
           }
-          function getPixels() {
-            const keyword = letters[currentPos],
-              gridX = 5,
-              gridY = 5;
-
-            const tmpCanvas = document.createElement("canvas"),
-              tmpCtx = tmpCanvas.getContext("2d");
-
-            tmpCanvas.width = canvas.width;
-            tmpCanvas.height = canvas.height;
-          }
-          function initializeBackFaceAnimation() {
-            const canvas = document.getElementById("backFaceCanvas");
-            if (!canvas) {
-              console.error("BackFace canvas element not found");
-              return;
-            }
-            const ctx = canvas.getContext("2d", {
-              willReadFrequently: true,
-            });
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const colors = [
-              "#FF4500",
-              "#00CED1",
-              "#FF00FF",
-              "#FFFF00",
-              "#7FFFD4",
-              "#FF1493",
-              "#00FF00",
-              "#8A2BE2",
-              "#FF6347",
-              "#00FFFF",
-              "#FF8C00",
-              "#9400D3",
-            ];
-
-            const userName = localStorage.getItem("userName")
-              ? localStorage.getItem("userName")
-              : "<APT/>";
-
-            class Particle {
-              constructor(effect, x, y) {
-                this.effect = effect;
-                this.x = Math.random() * this.effect.canvasWidth;
-                this.y = Math.random() * this.effect.canvasHeight;
-                this.originX = Math.floor(x);
-                this.originY = Math.floor(y);
-                this.size = Math.random() * 2 + 1;
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-                this.dx = 0;
-                this.dy = 0;
-                this.vx = 0;
-                this.vy = 0;
-                this.force = 20;
-                this.angle = 0;
-                this.distance = 0;
-                this.friction = 0.8;
-                this.ease = 1;
-              }
-              update() {
-                this.dx = this.effect.mouse.x - this.x;
-                this.dy = this.effect.mouse.y - this.y;
-                this.distance = this.dx * this.dx + this.dy * this.dy;
-                this.force = -this.effect.mouse.radius / this.distance;
-                if (this.distance < this.effect.mouse.radius) {
-                  this.angle = Math.atan2(this.dy, this.dx);
-                  this.vx += this.force * Math.cos(this.angle);
-                  this.vy += this.force * Math.sin(this.angle);
-                }
-                this.x +=
-                  (this.vx *= this.friction) +
-                  (this.originX - this.x) * this.ease;
-                this.y +=
-                  (this.vy *= this.friction) +
-                  (this.originY - this.y) * this.ease;
-              }
-              draw() {
-                this.effect.context.fillStyle = this.color;
-                this.effect.context.beginPath();
-                this.effect.context.arc(
-                  this.x,
-                  this.y,
-                  this.size,
-                  0,
-                  2 * Math.PI
-                );
-                this.effect.context.fill();
-              }
-            }
-
-            class Effect {
-              constructor(context, canvasWidth, canvasHeight) {
-                this.context = context;
-                this.canvasWidth = canvasWidth;
-                this.canvasHeight = canvasHeight;
-                this.particles = [];
-                this.gap = 5;
-                this.mouse = {
-                  radius: 800 * 800,
-                  x: undefined,
-                  y: undefined,
-                };
-                window.addEventListener("mousemove", (event) => {
-                  const rect = canvas.getBoundingClientRect();
-                  const scaleX = canvas.width / rect.width;
-                  const scaleY = canvas.height / rect.height;
-                  this.mouse.x = (event.clientX - rect.left) * scaleX;
-                  this.mouse.y = (event.clientY - rect.top) * scaleY;
-                });
-                window.addEventListener("mouseout", () => {
-                  this.mouse.x = undefined;
-                  this.mouse.y = undefined;
-                });
-                this.wrapText(userName);
-              }
-              wrapText(text) {
-                this.context.font = "500px Arial";
-                this.context.fillStyle = "white";
-                this.context.textAlign = "center";
-                this.context.fillText(
-                  text,
-                  this.canvasWidth / 2,
-                  this.canvasHeight / 1.8
-                );
-                this.convertToParticles();
-              }
-              convertToParticles() {
-                this.particles = [];
-                const imageData = this.context.getImageData(
-                  0,
-                  0,
-                  this.canvasWidth,
-                  this.canvasHeight
-                );
-                const data = imageData.data;
-                for (let y = 0; y < this.canvasHeight; y += this.gap) {
-                  for (let x = 0; x < this.canvasWidth; x += this.gap) {
-                    const index = (y * this.canvasWidth + x) * 4;
-                    if (data[index + 3] > 128) {
-                      this.particles.push(new Particle(this, x, y));
-                    }
-                  }
-                }
-              }
-              render() {
-                this.context.clearRect(
-                  0,
-                  0,
-                  this.canvasWidth,
-                  this.canvasHeight
-                );
-                this.particles.forEach((particle) => {
-                  particle.update();
-                  particle.draw();
-                });
-              }
-            }
-
-            let effect = new Effect(ctx, canvas.width, canvas.height);
-
-            function animate() {
-              effect.render();
-              requestAnimationFrame(animate);
-            }
-            animate();
-
-            window.addEventListener("resize", function () {
-              canvas.width = window.innerWidth;
-              canvas.height = window.innerHeight;
-              effect = new Effect(ctx, canvas.width, canvas.height);
-              effect.wrapText(userName);
-            });
-          }
-
+      
           async function initializeBottomFaceAnimation(canvasId) {
-            if (typeof BABYLON === "undefined") {
-              await import("https://cdn.babylonjs.com/babylon.js");
-            }
-
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) {
-              console.error("BottomFace canvas element not found");
-              return;
-            }
-
-            const engine = new BABYLON.Engine(canvas, true);
-            const scene = new BABYLON.Scene(engine);
-            scene.clearColor = new BABYLON.Color4(
-              1 / 255,
-              4 / 255,
-              43 / 255,
-              1
-            ); // Dark navy blue background
-
-            const camera = new BABYLON.ArcRotateCamera(
-              "Camera",
-              -Math.PI / 2,
-              Math.PI / 2,
-              1000,
-              BABYLON.Vector3.Zero(),
-              scene
-            );
-            camera.attachControl(canvas, true);
-
-            const light = new BABYLON.HemisphericLight(
-              "light1",
-              new BABYLON.Vector3(1, 1, 0),
-              scene
-            );
-
-            const SEPARATION = 100,
-              AMOUNTX = 50,
-              AMOUNTY = 50;
-            let count = 0;
-            const planes = [];
-            const letterTextures = {};
-            const letterMaterials = {};
-            const letters = localStorage.getItem("userName")
-              ? localStorage.getItem("userName").split("")
-              : ["A", "P", "T"];
-
-            for (let ix = 0; ix < AMOUNTX; ix++) {
-              for (let iy = 0; iy < AMOUNTY; iy++) {
+        if (typeof BABYLON === "undefined") {
+            await import("https://cdn.babylonjs.com/babylon.js");
+        }
+    
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.error("BottomFace canvas element not found");
+            return;
+        }
+    
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(1 / 255, 4 / 255, 43 / 255, 1); // Dark navy blue background
+    
+        const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 300, BABYLON.Vector3(0,0,10), scene);
+        camera.attachControl(canvas, true);
+    
+        const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
+    
+        const SEPARATION = 40, AMOUNTX = 15, AMOUNTY = 15;
+        let count = 0;
+        const planes = [];
+        const letterTextures = {};
+        const letterMaterials = {};
+        const letters = localStorage.getItem("userName") ? localStorage.getItem("userName").split('') : ["A", "P", "T"];
+    
+        for (let ix = 0; ix < AMOUNTX; ix++) {
+            for (let iy = 0; iy < AMOUNTY; iy++) {
                 const index = Math.floor(Math.random() * letters.length);
                 const letter = letters[index];
                 if (!letterTextures[letter]) {
-                  letterTextures[letter] = createLetterTexture(letter, scene);
-                  letterMaterials[letter] = createLetterMaterial(
-                    letterTextures[letter],
-                    scene
-                  );
+                    letterTextures[letter] = createLetterTexture(letter, scene);
+                    letterMaterials[letter] = createLetterMaterial(letterTextures[letter], scene);
                 }
-                const plane = createLetterParticle(
-                  letter,
-                  ix,
-                  iy,
-                  SEPARATION,
-                  scene,
-                  letterMaterials[letter]
-                );
+                const glowLayer = new BABYLON.GlowLayer("glow", scene);
+                glowLayer.intensity = 1.5;
+                const plane = createLetterParticle(letter, ix, iy, SEPARATION, scene, letterMaterials[letter]);
                 planes.push(plane);
-              }
+                glowLayer.addIncludedOnlyMesh(plane);
             }
-
-            function createLetterTexture(letter, scene) {
-              const dynamicTexture = new BABYLON.DynamicTexture(
-                "DynamicTexture",
-                { width: 512, height: 512 },
-                scene,
-                true
-              );
-              dynamicTexture.drawText(
-                letter,
-                75,
-                400,
-                "bold 440px Arial",
-                "#07f7df",
-                "transparent",
-                true
-              );
-              dynamicTexture.hasAlpha = true;
-              return dynamicTexture;
-            }
-
-            function createLetterMaterial(texture, scene) {
-              const material = new BABYLON.StandardMaterial(
-                "TextPlaneMaterial",
-                scene
-              );
-              material.diffuseTexture = texture;
-              material.useAlphaFromDiffuseTexture = true;
-              return material;
-            }
-
-            function createLetterParticle(
-              letter,
-              ix,
-              iy,
-              SEPARATION,
-              scene,
-              material
-            ) {
-              const plane = BABYLON.MeshBuilder.CreatePlane(
-                "textPlane",
-                { size: 20 },
-                scene
-              );
-              plane.position.x = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
-              plane.position.z = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
-              plane.position.y = 0;
-              plane.material = material;
-              return plane;
-            }
-
-            scene.registerBeforeRender(function () {
-              const time = performance.now();
-              for (let i = 0, l = planes.length; i < l; i++) {
+        }
+        
+        function createLetterTexture(letter, scene) {
+            const dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", { width: 512, height: 512 }, scene, true);
+            dynamicTexture.drawText(letter, 75, 400, "bold 440px Arial", "#00ff00", "transparent", true);
+            dynamicTexture.hasAlpha = true;
+            return dynamicTexture;
+        }
+    
+        function createLetterMaterial(texture, scene) {
+            const material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
+            material.diffuseTexture = texture;
+            material.useAlphaFromDiffuseTexture = true;
+            return material;
+        }
+    
+        function createLetterParticle(letter, ix, iy, SEPARATION, scene, material) {
+            const plane = BABYLON.MeshBuilder.CreatePlane("textPlane", { size: 20 }, scene);
+            plane.position.x = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
+            plane.position.z = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
+            plane.position.y = 0;
+            plane.material = material;
+            return plane;
+        }
+    
+        scene.registerBeforeRender(function () {
+            const time = performance.now();
+            for (let i = 0, l = planes.length; i < l; i++) {
                 const plane = planes[i];
-                const ix = i % AMOUNTX,
-                  iy = Math.floor(i / AMOUNTX);
-                plane.position.y =
-                  Math.sin((ix + count) * 0.3) * 50 +
-                  Math.sin((iy + count) * 0.5) * 50;
+                const ix = i % AMOUNTX, iy = Math.floor(i / AMOUNTX);
+                plane.position.y = Math.sin((ix + count) * 0.3) * 50 + Math.sin((iy + count) * 0.5) * 50;
                 plane.rotation.z = Math.sin((ix + count) * 0.3) * Math.PI * 0.2;
-              }
-              count += 0.1;
-            });
-
-            engine.runRenderLoop(() => {
-              scene.render();
-            });
-
-            window.addEventListener("resize", () => {
-              engine.resize();
-            });
-          }
-
+            }
+            count += 0.1;
+        });
+    
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+    
+        window.addEventListener("resize", () => {
+            engine.resize();
+        });
+    }
+    
           async function initializeRightFaceAnimation(canvasId) {
-            if (typeof BABYLON === "undefined") {
-              await import("https://cdn.babylonjs.com/babylon.js");
-              await import(
-                "https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"
-              );
-            }
-
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) {
-              console.error("RightFace canvas element not found");
-              return;
-            }
-
-            const engine = new BABYLON.Engine(canvas, true);
-            const scene = new BABYLON.Scene(engine);
-            scene.clearColor = new BABYLON.Color4(0.03, 0.03, 0.12, 1);
-            const sphericalContainer = new BABYLON.TransformNode(
-              "sphericalContainer"
-            );
-            const camera = new BABYLON.ArcRotateCamera(
-              "Camera",
-              -Math.PI / 2,
-              Math.PI / 2,
-              130,
-              new BABYLON.Vector3(0, 0, 0),
-              scene
-            );
-            camera.attachControl(canvas, true);
-            const light = new BABYLON.HemisphericLight(
-              "light1",
-              new BABYLON.Vector3(1, 1, 0),
-              scene
-            );
-            const glowLayer = new BABYLON.GlowLayer("glow", scene);
-            glowLayer.intensity = 0.6;
-
-            const letters = localStorage.getItem("userName")
-              ? localStorage.getItem("userName").split("")
-              : ["A", "P", "T"];
-            const RADIUS = 100;
-            const NUM_PLANETS = 1500;
-            const planets = [];
-
-            function createLetterPlanet(letter, index, radius, scene) {
-              const size = 50;
-              const dynamicTexture = new BABYLON.DynamicTexture(
-                "DynamicTexture",
-                { width: size, height: size },
-                scene,
-                true
-              );
-              dynamicTexture.drawText(
-                letter,
-                10,
-                40,
-                "bold 40px Arial",
-                "#00FF00",
-                "transparent",
-                true
-              );
-              dynamicTexture.hasAlpha = true;
-
-              const plane = BABYLON.MeshBuilder.CreatePlane(
-                `textPlane${index}`,
-                { size: 1 },
-                scene
-              );
-              plane.parent = sphericalContainer;
-              const r = Math.cbrt(Math.random()) * radius;
-              const theta = Math.random() * 2 * Math.PI;
-              const phi = Math.acos(2 * Math.random() - 1);
-              plane.position = new BABYLON.Vector3(
-                r * Math.sin(phi) * Math.cos(theta),
-                r * Math.sin(phi) * Math.sin(theta),
-                r * Math.cos(phi)
-              );
-              plane.lookAt(BABYLON.Vector3.Zero());
-
-              const material = new BABYLON.StandardMaterial(
-                `PlanetMaterial${index}`,
-                scene
-              );
-              material.emissiveColor = BABYLON.Color3.FromHexString("#00FF00");
-              material.useAlphaFromDiffuseTexture = true;
-              material.diffuseTexture = dynamicTexture;
-              plane.material = material;
-
-              glowLayer.addIncludedOnlyMesh(plane);
-              return plane;
-            }
-
-            for (let i = 0; i < NUM_PLANETS; i++) {
-              const letter = letters[i % letters.length];
-              const planet = createLetterPlanet(letter, i, RADIUS, scene);
-              planets.push(planet);
-            }
-
-            engine.runRenderLoop(() => {
-              sphericalContainer.rotation.y += 0.001;
-              scene.render();
-            });
-
-            window.addEventListener("resize", () => {
-              engine.resize();
-            });
+        if (typeof BABYLON === "undefined") {
+          await import("https://cdn.babylonjs.com/babylon.js");
+          await import("https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js");
+        }
+      
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+          console.error("RightFace canvas element not found");
+          return;
+        }
+      
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(0.03, 0.03, 0.12, 1);
+        const sphericalContainer = new BABYLON.TransformNode("sphericalContainer");
+        const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 100, new BABYLON.Vector3(0, 0, 80), scene);
+        camera.attachControl(canvas, true);
+        const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
+        const glowLayer = new BABYLON.GlowLayer("glow", scene);
+        glowLayer.intensity = 0.6;
+      
+        const baseMesh = BABYLON.MeshBuilder.CreatePlane("textPlaneBase", { size: 1 }, scene);
+        baseMesh.isVisible = false;
+      
+        const material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
+        material.emissiveColor = BABYLON.Color3.FromHexString("#00FF00");
+        material.useAlphaFromDiffuseTexture = true;
+        baseMesh.material = material;
+      
+        const letters = localStorage.getItem("userName") ? localStorage.getItem("userName").split('') : ["A", "P", "T"];
+        const RADIUS = 12;
+        const NUM_PLANETS = 500;
+        const planets = [];
+        const dynamicTextures = {};
+      
+        function createDynamicTexture(letter) {
+          const size = 150;
+          const dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", { width: size, height: size }, scene, true);
+          dynamicTexture.drawText(letter, 10, 40, "bold 40px Arial", "#00FF00", "transparent", true);
+          dynamicTexture.hasAlpha = true;
+          return dynamicTexture;
+        }
+      
+        for (let i = 0; i < NUM_PLANETS; i++) {
+          const letter = letters[i % letters.length];
+          if (!dynamicTextures[letter]) {
+            dynamicTextures[letter] = createDynamicTexture(letter);
           }
+          const planet = createLetterPlanet(letter, i, RADIUS, scene, baseMesh.createInstance(`textPlaneInstance${i}`), dynamicTextures[letter]);
+          planets.push(planet);
+        }
+      
+        engine.runRenderLoop(() => {
+          sphericalContainer.rotation.y += 0.001;
+          scene.render();
+        });
+      
+        window.addEventListener("resize", () => {
+          engine.resize();
+        });
+      
+        function createLetterPlanet(letter, index, radius, scene, plane, dynamicTexture) {
+          plane.parent = sphericalContainer;
+          const r = Math.cbrt(Math.random()) * radius;
+          const theta = Math.random() * 2 * Math.PI;
+          const phi = Math.acos(2 * Math.random() - 1);
+          plane.position = new BABYLON.Vector3(r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
+          plane.lookAt(BABYLON.Vector3.Zero());
+          plane.material.diffuseTexture = dynamicTexture;
+          plane.material.emissiveTexture = dynamicTexture;
+          glowLayer.addIncludedOnlyMesh(plane);
+          return plane;
+        }
+      }
+      
           function initializeLeftFaceAnimation(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+          console.error("LeftFace canvas element not found");
+          return;
+        }
+    
+        const ctx = canvas.getContext("2d");
+        let w, h;
+        let hue;
+        let particles;
+        let spikeLength;
+        let planets;
+        let A;
+        let B;
+        let a;
+        let b;
+        let tick;
+        const config = {
+          text: localStorage.getItem("userName") ? localStorage.getItem("userName") :"<APT/>",
+          widthToSpikeLengthRatio: 0.054,
+        };
+    
+        const colorConfig = {
+          particleOpacity: 0.2,
+          baseHue: 350,
+          hueRange: 9,
+          hueSpeed: 0.04,
+          colorSaturation: 100,
+        };
+    
+        function setup() {
+          tick = 0;
+          planets = [];
+          let len = Math.round(Math.random() * 3 + 3);
+          for (let i = 0; i < len; i++) {
+            let p = new Planet(50 + i * 100, 340, i ? 1000 : 4000);
+            planets.push(p);
+          }
+          window.addEventListener("resize", reset);
+          canvas.addEventListener("mousemove", mousemove);
+          reset();
+        }
+    
+        function reset() {
+          hue = colorConfig.baseHue;
+          w = canvas.width = window.innerWidth;
+          h = canvas.height = window.innerHeight;
+          spikeLength = w * config.widthToSpikeLengthRatio;
+          A = w / 2.2;
+          B = h / 2.2;
+          a = Math.round(Math.random() + 2);
+          b = Math.round(Math.random() + 2);
+          drawText();
+        }
+    
+        function mousemove(event) {
+          let x = event.clientX;
+          let y = event.clientY;
+          planets[0].pos.x = x;
+          planets[0].pos.y = y;
+        }
+    
+        function draw(now) {
+          clear();
+          requestAnimationFrame(draw);
+          updateParticles();
+          updatePlanets();
+          tick = now / 50;
+        }
+    
+        function clear() {
+          ctx.clearRect(0, 0, w, h);
+        }
+    
+        function drawText() {
+          ctx.save();
+          let fontSize = w * 0.2;
+          ctx.font = "bold " + fontSize + "px Arial, Helvetica, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = "white";
+          ctx.strokeText(config.text, w / 2, h / 2);
+          ctx.restore();
+          let imageData = ctx.getImageData(0, 0, w, h);
+    
+          particles = [];
+    
+          let skipFactor = 2;
+    
+          for (let x = 0; x < w; x += skipFactor) {
+            for (let y = 0; y < h; y += skipFactor) {
+              let i = (x + w * y) * 4;
+              let average =
+                (imageData.data[i] +
+                  imageData.data[i + 1] +
+                  imageData.data[i + 2] +
+                  imageData.data[i + 3]) /
+                4;
+              if (average > 200) {
+                let particle = new Particle(x, y);
+                particles.push(particle);
+              }
+            }
+          }
+          clear();
+        }
+    
+        function updatePlanets() {
+          let len = planets.length;
+          for (let i = 1; i < len; i++) {
+            let angle = ((Math.PI * 2) / (len - 1)) * i;
+            let x = A * Math.sin((a * tick) / 100 + angle) + w / 2;
+            let y = B * Math.sin((b * tick) / 100 + angle) + h / 2;
+            let p = planets[i];
+            p.pos.x = x;
+            p.pos.y = y;
+            p.draw();
+          }
+        }
+    
+        function updateParticles() {
+          hue += colorConfig.hueSpeed;
+          let h = Math.sin(hue) * colorConfig.hueRange + colorConfig.baseHue;
+          ctx.strokeStyle = `hsla(180, 100%, 50%, 1)`;
+          particles.forEach((p) => {
+            planets.forEach((planet) => {
+              let d = p.pos.sub(planet.pos);
+              let length = d.getLength();
+              let g = planet.g / length;
+              if (g > 40) {
+                g = 40;
+              }
+              d.setLength(g);
+              p.move(d);
+            });
+            p.draw();
+          });
+        }
+    
+        class Vector {
+          constructor(x, y) {
+            this.x = x;
+            this.y = y;
+          }
+    
+          add(v) {
+            return new Vector(this.x + v.x, this.y + v.y);
+          }
+    
+          sub(v) {
+            return new Vector(this.x - v.x, this.y - v.y);
+          }
+    
+          getLength() {
+            return Math.sqrt(this.x * this.x + this.y * this.y);
+          }
+    
+          setLength(length) {
+            var angle = this.getAngle();
+            this.x = Math.cos(angle) * length;
+            this.y = Math.sin(angle) * length;
+          }
+    
+          getAngle() {
+            return Math.atan2(this.y, this.x);
+          }
+    
+          addTo(v) {
+            this.x += v.x;
+            this.y += v.y;
+          }
+    
+          multiplyBy(value) {
+            this.x *= value;
+            this.y *= value;
+          }
+    
+          setAngle(angle) {
+            var length = this.getLength();
+            this.x = Math.cos(angle) * length;
+            this.y = Math.sin(angle) * length;
+          }
+        }
+    
+        class Planet {
+          constructor(x, y, g) {
+            this.pos = new Vector(x, y);
+            this.g = g;
+          }
+    
+          draw() {
+            // ctx.beginPath();
+            // ctx.fillStyle = "white";
+            // ctx.arc(this.pos.x, this.pos.y, 10, 0, Math.PI * 2);
+            // ctx.fill();
+          }
+        }
+    
+        class Particle {
+          constructor(x, y) {
+            this.pos = new Vector(x, y);
+            this.vel = new Vector(0, spikeLength);
+          }
+    
+          move(force) {
+            if (force) {
+              this.vel.addTo(force);
+            }
+            if (this.vel.getLength() > spikeLength) {
+              this.vel.setLength(spikeLength);
+            }
+          }
+    
+          draw() {
+            let p2 = this.pos.add(this.vel);
+            let gradient = ctx.createLinearGradient(
+              this.pos.x,
+              this.pos.y,
+              p2.x,
+              p2.y
+            );
+            gradient.addColorStop(0, "rgba(0, 255, 255, 0)");
+            gradient.addColorStop(1, "rgba(0, 255, 255, 1)");
+    
+            ctx.beginPath();
+            ctx.moveTo(this.pos.x, this.pos.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = gradient;
+            ctx.stroke();
+          }
+        }
+    
+        setup();
+        draw(1);
+      }
+    
+          function initializeTopFaceAnimation(canvasId) {
+        let engine, scene, camera;
+        let letters = [];
+        let ripples = [];
+        let water;
+        init();
+        animate();
+    
+        function init() {
             const canvas = document.getElementById(canvasId);
             if (!canvas) {
-              console.error("LeftFace canvas element not found");
-              return;
-            }
-
-            const ctx = canvas.getContext("2d");
-            let w, h;
-            let hue;
-            let particles;
-            let spikeLength;
-            let planets;
-            let A;
-            let B;
-            let a;
-            let b;
-            let tick;
-            const config = {
-              text: localStorage.getItem("userName")
-                ? localStorage.getItem("userName")
-                : "<APT/>",
-              widthToSpikeLengthRatio: 0.054,
-            };
-
-            const colorConfig = {
-              particleOpacity: 0.2,
-              baseHue: 350,
-              hueRange: 9,
-              hueSpeed: 0.04,
-              colorSaturation: 100,
-            };
-
-            function setup() {
-              tick = 0;
-              planets = [];
-              let len = Math.round(Math.random() * 3 + 3);
-              for (let i = 0; i < len; i++) {
-                let p = new Planet(50 + i * 100, 340, i ? 1000 : 4000);
-                planets.push(p);
-              }
-              window.addEventListener("resize", reset);
-              canvas.addEventListener("mousemove", mousemove);
-              reset();
-            }
-
-            function reset() {
-              hue = colorConfig.baseHue;
-              w = canvas.width = window.innerWidth;
-              h = canvas.height = window.innerHeight;
-              spikeLength = w * config.widthToSpikeLengthRatio;
-              A = w / 2.2;
-              B = h / 2.2;
-              a = Math.round(Math.random() + 2);
-              b = Math.round(Math.random() + 2);
-              drawText();
-            }
-
-            function mousemove(event) {
-              let x = event.clientX;
-              let y = event.clientY;
-              planets[0].pos.x = x;
-              planets[0].pos.y = y;
-            }
-
-            function draw(now) {
-              clear();
-              requestAnimationFrame(draw);
-              updateParticles();
-              updatePlanets();
-              tick = now / 50;
-            }
-
-            function clear() {
-              ctx.clearRect(0, 0, w, h);
-            }
-
-            function drawText() {
-              ctx.save();
-              let fontSize = w * 0.2;
-              ctx.font = "bold " + fontSize + "px Arial, Helvetica, sans-serif";
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-              ctx.lineWidth = 1;
-              ctx.strokeStyle = "white";
-              ctx.strokeText(config.text, w / 2, h / 2);
-              ctx.restore();
-              let imageData = ctx.getImageData(0, 0, w, h);
-
-              particles = [];
-
-              let skipFactor = 2;
-
-              for (let x = 0; x < w; x += skipFactor) {
-                for (let y = 0; y < h; y += skipFactor) {
-                  let i = (x + w * y) * 4;
-                  let average =
-                    (imageData.data[i] +
-                      imageData.data[i + 1] +
-                      imageData.data[i + 2] +
-                      imageData.data[i + 3]) /
-                    4;
-                  if (average > 200) {
-                    let particle = new Particle(x, y);
-                    particles.push(particle);
-                  }
-                }
-              }
-              clear();
-            }
-
-            function updatePlanets() {
-              let len = planets.length;
-              for (let i = 1; i < len; i++) {
-                let angle = ((Math.PI * 2) / (len - 1)) * i;
-                let x = A * Math.sin((a * tick) / 100 + angle) + w / 2;
-                let y = B * Math.sin((b * tick) / 100 + angle) + h / 2;
-                let p = planets[i];
-                p.pos.x = x;
-                p.pos.y = y;
-                p.draw();
-              }
-            }
-
-            function updateParticles() {
-              hue += colorConfig.hueSpeed;
-              let h =
-                Math.sin(hue) * colorConfig.hueRange + colorConfig.baseHue;
-              ctx.strokeStyle = `hsla(180, 100%, 50%, 1)`;
-              particles.forEach((p) => {
-                planets.forEach((planet) => {
-                  let d = p.pos.sub(planet.pos);
-                  let length = d.getLength();
-                  let g = planet.g / length;
-                  if (g > 40) {
-                    g = 40;
-                  }
-                  d.setLength(g);
-                  p.move(d);
-                });
-                p.draw();
-              });
-            }
-
-            class Vector {
-              constructor(x, y) {
-                this.x = x;
-                this.y = y;
-              }
-
-              add(v) {
-                return new Vector(this.x + v.x, this.y + v.y);
-              }
-
-              sub(v) {
-                return new Vector(this.x - v.x, this.y - v.y);
-              }
-
-              getLength() {
-                return Math.sqrt(this.x * this.x + this.y * this.y);
-              }
-
-              setLength(length) {
-                var angle = this.getAngle();
-                this.x = Math.cos(angle) * length;
-                this.y = Math.sin(angle) * length;
-              }
-
-              getAngle() {
-                return Math.atan2(this.y, this.x);
-              }
-
-              addTo(v) {
-                this.x += v.x;
-                this.y += v.y;
-              }
-
-              multiplyBy(value) {
-                this.x *= value;
-                this.y *= value;
-              }
-
-              setAngle(angle) {
-                var length = this.getLength();
-                this.x = Math.cos(angle) * length;
-                this.y = Math.sin(angle) * length;
-              }
-            }
-
-            class Planet {
-              constructor(x, y, g) {
-                this.pos = new Vector(x, y);
-                this.g = g;
-              }
-
-              draw() {
-                // ctx.beginPath();
-                // ctx.fillStyle = "white";
-                // ctx.arc(this.pos.x, this.pos.y, 10, 0, Math.PI * 2);
-                // ctx.fill();
-              }
-            }
-
-            class Particle {
-              constructor(x, y) {
-                this.pos = new Vector(x, y);
-                this.vel = new Vector(0, spikeLength);
-              }
-
-              move(force) {
-                if (force) {
-                  this.vel.addTo(force);
-                }
-                if (this.vel.getLength() > spikeLength) {
-                  this.vel.setLength(spikeLength);
-                }
-              }
-
-              draw() {
-                let p2 = this.pos.add(this.vel);
-                let gradient = ctx.createLinearGradient(
-                  this.pos.x,
-                  this.pos.y,
-                  p2.x,
-                  p2.y
-                );
-                gradient.addColorStop(0, "rgba(0, 255, 255, 0)");
-                gradient.addColorStop(1, "rgba(0, 255, 255, 1)");
-
-                ctx.beginPath();
-                ctx.moveTo(this.pos.x, this.pos.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.strokeStyle = gradient;
-                ctx.stroke();
-              }
-            }
-
-            setup();
-            draw(1);
-          }
-
-          function initializeTopFaceAnimation(canvasId) {
-            let engine, scene, camera;
-            let letters = [];
-            let ripples = [];
-            let water;
-            init();
-            animate();
-
-            function init() {
-              const canvas = document.getElementById(canvasId);
-              if (!canvas) {
                 console.error("TopFace canvas element not found");
                 return;
-              }
-
-              engine = new BABYLON.Engine(canvas, true);
-              scene = new BABYLON.Scene(engine);
-              var background = new BABYLON.Layer("back", null, scene);
-              background.texture = new BABYLON.DynamicTexture(
-                "dynaTexture",
-                1024,
-                scene,
-                true
-              );
-              var textureContext = background.texture.getContext();
-              var grd = textureContext.createRadialGradient(
-                512,
-                512,
-                0,
-                512,
-                512,
-                512
-              );
-              grd.addColorStop(0, "#000015");
-              grd.addColorStop(0.8, "#000011");
-              textureContext.fillStyle = grd;
-              textureContext.fillRect(0, 0, 1024, 1024);
-              background.texture.update();
-
-              camera = new BABYLON.ArcRotateCamera(
+            }
+    
+            engine = new BABYLON.Engine(canvas, true);
+            scene = new BABYLON.Scene(engine);
+            var background = new BABYLON.Layer("back", null, scene);
+            background.texture = new BABYLON.DynamicTexture("dynaTexture", 1024, scene, true);
+            var textureContext = background.texture.getContext();
+            var grd = textureContext.createRadialGradient(512, 512, 0, 512, 512, 512);
+            grd.addColorStop(0, "#000015");
+            grd.addColorStop(0.8, "#000011");
+            textureContext.fillStyle = grd;
+            textureContext.fillRect(0, 0, 1024, 1024);
+            background.texture.update();
+    
+            camera = new BABYLON.ArcRotateCamera(
                 "Camera",
                 -Math.PI / 2,
-                70 * (Math.PI / 180),
+                Math.PI / 2,
                 340,
-                new BABYLON.Vector3(0, 0, 0),
+                new BABYLON.Vector3(0, 0, 50),
                 scene
-              );
-              camera.setTarget(BABYLON.Vector3.Zero());
-              camera.attachControl(canvas, true);
-
-              new BABYLON.HemisphericLight(
+            );
+            camera.setTarget(BABYLON.Vector3.Zero());
+            camera.attachControl(canvas, true);
+    
+            new BABYLON.HemisphericLight(
                 "light1",
                 new BABYLON.Vector3(1, 1, 0),
                 scene
-              ).intensity = 0.7;
-
-              waterMaterial = new BABYLON.StandardMaterial(
-                "waterMaterial",
-                scene
-              );
-              waterMaterial.diffuseColor = new BABYLON.Color4(0, 0, 0, 0.3);
-              waterMaterial.alpha = 0.6;
-              water = BABYLON.MeshBuilder.CreateGround(
+            ).intensity = 0.7;
+    
+            waterMaterial = new BABYLON.StandardMaterial("waterMaterial", scene);
+            waterMaterial.diffuseColor = new BABYLON.Color4(0.02, 0.02, 0.1, 0.3);
+            waterMaterial.alpha = 0.6;
+            water = BABYLON.MeshBuilder.CreateGround(
                 "water",
                 { width: 1000, height: 3300 },
                 scene
-              );
-              water.material = waterMaterial;
-              water.position.y = -30;
-
-              createTextParticles();
-            }
-
-            function createTextParticles() {
-              const lettersOptions = localStorage.getItem("userName")
-                ? localStorage.getItem("userName").split("")
-                : ["A", "P", "T"];
-
-              lettersOptions.forEach((letter) => {
-                for (let i = 0; i < 300; i++) {
-                  const plane = BABYLON.MeshBuilder.CreatePlane(
-                    "textPlane",
-                    { width: 4, height: 4 },
-                    scene
-                  );
-                  const dynamicTexture = new BABYLON.DynamicTexture(
-                    "DynamicTexture",
-                    512,
-                    scene,
-                    true
-                  );
-                  dynamicTexture.drawText(
-                    letter,
-                    75,
-                    400,
-                    "bold 440px Arial",
-                    "#34e8eb",
-                    "transparent",
-                    true
-                  );
-                  dynamicTexture.hasAlpha = true;
-
-                  const material = new BABYLON.StandardMaterial(
-                    "TextPlaneMaterial",
-                    scene
-                  );
-                  material.diffuseTexture = dynamicTexture;
-                  material.emissiveColor = new BABYLON.Color4(0, 1, 1, 0.5);
-                  material.useAlphaFromDiffuseTexture = true;
-
-                  plane.material = material;
-                  plane.position = new BABYLON.Vector3(
-                    Math.random() * 300 - 150,
-                    Math.random() * 90 + 30,
-                    Math.random() * 300 - 150
-                  );
-                  plane.metadata = { velocity: -Math.random() * 0.5 - 0.5 };
-
-                  letters.push(plane);
+            );
+            water.material = waterMaterial;
+            water.position.y = -30;
+    
+            createTextParticles();
+        }
+    
+        function createTextParticles() {
+            const lettersOptions = localStorage.getItem("userName") ? localStorage.getItem("userName").split('') : ["A", "P", "T"];
+    
+            lettersOptions.forEach((letter) => {
+                for (let i = 0; i < 75; i++) {  // Reduced particle count to 50%
+                    const plane = BABYLON.MeshBuilder.CreatePlane(
+                        "textPlane",
+                        { width: 4, height: 4 },
+                        scene
+                    );
+                    const dynamicTexture = new BABYLON.DynamicTexture(
+                        "DynamicTexture",
+                        512,
+                        scene,
+                        true
+                    );
+                    dynamicTexture.drawText(
+                        letter,
+                        75,
+                        400,
+                        "bold 500px Arial",
+                        "#00ff00",
+                        "transparent",
+                        true
+                    );
+                    dynamicTexture.hasAlpha = true;
+    
+                    const material = new BABYLON.StandardMaterial(
+                        "TextPlaneMaterial",
+                        scene
+                    );
+                    material.diffuseTexture = dynamicTexture;
+                    material.emissiveColor = new BABYLON.Color4(0, 1, 1, 0.5);
+                    material.useAlphaFromDiffuseTexture = true;
+    
+                    plane.material = material;
+                    plane.position = new BABYLON.Vector3(
+                        Math.random() * 300 - 150,
+                        Math.random() * 90 + 30,
+                        Math.random() * 300 - 150
+                    );
+                    plane.metadata = { velocity: -Math.random() * 1 - 0.5 };
+    
+                    letters.push(plane);
                 }
-              });
-            }
-
-            function createRipple(position) {
-              const ripple = BABYLON.MeshBuilder.CreateTorus(
+            });
+        }
+    
+        function createRipple(position) {
+            const ripple = BABYLON.MeshBuilder.CreateTorus(
                 "ripple",
                 { diameter: 1.5, thickness: 0.15, tessellation: 32 },
                 scene
-              );
-              ripple.position = new BABYLON.Vector3(
+            );
+            ripple.position = new BABYLON.Vector3(
                 position.x,
                 water.position.y - 20,
                 position.z - 20
-              );
-              ripple.rotation.x = Math.PI / 2;
-              const material = new BABYLON.StandardMaterial("rippleMat", scene);
-              material.diffuseColor = new BABYLON.Color3(0, 1, 1);
-              material.emissiveColor = new BABYLON.Color3(0, 1, 1);
-              material.alpha = 1;
-              ripple.material = material;
-
-              ripples.push({
+            );
+            ripple.rotation.x = Math.PI / 2;
+            const material = new BABYLON.StandardMaterial("rippleMat", scene);
+            material.diffuseColor = new BABYLON.Color3(0, 1, 1);
+            material.emissiveColor = new BABYLON.Color3(0, 1, 1);
+            material.alpha = 1;
+            ripple.material = material;
+    
+            ripples.push({
                 mesh: ripple,
                 scale: 1,
                 alpha: material.alpha,
                 maxSize: 9,
-              });
-            }
-
-            function animate() {
-              engine.runRenderLoop(() => {
+            });
+        }
+    
+        function animate() {
+            engine.runRenderLoop(() => {
                 letters.forEach((letter) => {
-                  letter.position.y += letter.metadata.velocity;
-                  if (letter.position.y < -90) {
-                    const impactPosition = new BABYLON.Vector3(
-                      letter.position.x,
-                      -4.95,
-                      letter.position.z
-                    );
-                    createRipple(impactPosition);
-                    letter.position.y = 90 + Math.random() * 30;
-                    letter.position.x = Math.random() * 300 - 150;
-                    letter.position.z = Math.random() * 300 - 150;
-                  }
+                    letter.position.y += letter.metadata.velocity;
+                    if (letter.position.y < -90) {
+                        const impactPosition = new BABYLON.Vector3(
+                            letter.position.x,
+                            -4.95,
+                            letter.position.z
+                        );
+                        createRipple(impactPosition);
+                        letter.position.y = 90 + Math.random() * 30;
+                        letter.position.x = Math.random() * 300 - 150;
+                        letter.position.z = Math.random() * 300 - 150;
+                    }
                 });
-
+    
                 ripples.forEach((ripple, index) => {
-                  ripple.scale += 0.05;
-                  ripple.alpha -= 0.02;
-                  ripple.mesh.scaling.x = ripple.mesh.scaling.y = ripple.scale;
-                  ripple.mesh.material.alpha = ripple.alpha;
-
-                  if (ripple.scale > ripple.maxSize || ripple.alpha <= 0) {
-                    ripple.mesh.dispose();
-                    ripples.splice(index, 1);
-                  }
+                    ripple.scale += 0.05;
+                    ripple.alpha -= 0.02;
+                    ripple.mesh.scaling.x = ripple.mesh.scaling.y = ripple.scale;
+                    ripple.mesh.material.alpha = ripple.alpha;
+    
+                    if (ripple.scale > ripple.maxSize || ripple.alpha <= 0) {
+                        ripple.mesh.dispose();
+                        ripples.splice(index, 1);
+                    }
                 });
-
+    
                 scene.render();
-              });
-            }
-          }
-        </script>
+            });
+        }
+    }
+    </script>
       </body>
     </html>
   </head>
