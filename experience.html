@@ -325,6 +325,7 @@
       </head>
 
       <body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.2.2/browser/pixi.min.js"></script>
         <div id="toast">
           <span
             class="close"
@@ -975,93 +976,92 @@
             }
           }
       
-          async function initializeBottomFaceAnimation(canvasId) {
-        if (typeof BABYLON === "undefined") {
-            await import("https://cdn.babylonjs.com/babylon.js");
-        }
-    
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) {
-            console.error("BottomFace canvas element not found");
-            return;
-        }
-    
-        const engine = new BABYLON.Engine(canvas, true);
-        const scene = new BABYLON.Scene(engine);
-        scene.clearColor = new BABYLON.Color4(1 / 255, 4 / 255, 43 / 255, 1); // Dark navy blue background
-    
-        const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 300, BABYLON.Vector3(0,0,10), scene);
-        camera.attachControl(canvas, true);
-    
-        const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
-    
-        const SEPARATION = 40, AMOUNTX = 15, AMOUNTY = 15;
-        let count = 0;
-        const planes = [];
-        const letterTextures = {};
-        const letterMaterials = {};
-        const letters = localStorage.getItem("userName") ? localStorage.getItem("userName").split('') : ["A", "P", "T"];
-    
-        for (let ix = 0; ix < AMOUNTX; ix++) {
-            for (let iy = 0; iy < AMOUNTY; iy++) {
-                const index = Math.floor(Math.random() * letters.length);
-                const letter = letters[index];
-                if (!letterTextures[letter]) {
-                    letterTextures[letter] = createLetterTexture(letter, scene);
-                    letterMaterials[letter] = createLetterMaterial(letterTextures[letter], scene);
-                }
-                const glowLayer = new BABYLON.GlowLayer("glow", scene);
-                glowLayer.intensity = 1.5;
-                const plane = createLetterParticle(letter, ix, iy, SEPARATION, scene, letterMaterials[letter]);
-                planes.push(plane);
-                glowLayer.addIncludedOnlyMesh(plane);
+async function initializeBottomFaceAnimation(canvasId) {
+            if (typeof PIXI === "undefined") {
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.onload = resolve;
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.2.2/browser/pixi.min.js';
+                    document.head.appendChild(script);
+                });
             }
-        }
         
-        function createLetterTexture(letter, scene) {
-            const dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", { width: 512, height: 512 }, scene, true);
-            dynamicTexture.drawText(letter, 75, 400, "bold 440px Arial", "#00ff00", "transparent", true);
-            dynamicTexture.hasAlpha = true;
-            return dynamicTexture;
-        }
-    
-        function createLetterMaterial(texture, scene) {
-            const material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
-            material.diffuseTexture = texture;
-            material.useAlphaFromDiffuseTexture = true;
-            return material;
-        }
-    
-        function createLetterParticle(letter, ix, iy, SEPARATION, scene, material) {
-            const plane = BABYLON.MeshBuilder.CreatePlane("textPlane", { size: 20 }, scene);
-            plane.position.x = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
-            plane.position.z = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
-            plane.position.y = 0;
-            plane.material = material;
-            return plane;
-        }
-    
-        scene.registerBeforeRender(function () {
-            const time = performance.now();
-            for (let i = 0, l = planes.length; i < l; i++) {
-                const plane = planes[i];
-                const ix = i % AMOUNTX, iy = Math.floor(i / AMOUNTX);
-                plane.position.y = Math.sin((ix + count) * 0.3) * 50 + Math.sin((iy + count) * 0.5) * 50;
-                plane.rotation.z = Math.sin((ix + count) * 0.3) * Math.PI * 0.2;
+            const app = new PIXI.Application({
+                view: document.getElementById(canvasId),
+                width: window.innerWidth,
+                height: window.innerHeight,
+                backgroundColor: 0x01042b  // Dark navy blue background
+            });
+        
+            if (!app.view) {
+                console.error("BottomFace canvas element not found");
+                return;
             }
-            count += 0.1;
-        });
-    
-        engine.runRenderLoop(() => {
-            scene.render();
-        });
-    
-        window.addEventListener("resize", () => {
-            engine.resize();
-        });
-    }
-    
-          async function initializeRightFaceAnimation(canvasId) {
+        
+            const SEPARATION_X = 100, SEPARATION_Y = 50, AMOUNTX = 10, AMOUNTY = 20;
+            let count = 0;
+        
+            const letterTextures = {};
+            const letters = localStorage.getItem("userName") ? localStorage.getItem("userName").split('') : ["A", "P", "T"];
+        
+            letters.forEach(letter => {
+                const texture = PIXI.Texture.from(createLetterCanvas(letter));
+                letterTextures[letter] = texture;
+            });
+        
+            const planes = [];
+        
+            for (let ix = 0; ix < AMOUNTX; ix++) {
+                for (let iy = 0; iy < AMOUNTY; iy++) {
+                    const index = Math.floor(Math.random() * letters.length);
+                    const letter = letters[index];
+                    const sprite = new PIXI.Sprite(letterTextures[letter]);
+        
+                    const depthFactor = Math.random(); // Random depth for each particle
+                    const baseScale = 0.5 + 0.5 * (1 - depthFactor); // Adjust scale for depth
+        
+                    // Calculate positions with perspective
+                    sprite.x = ix * SEPARATION_X + app.screen.width / 2 - (AMOUNTX * SEPARATION_X) / 2;
+                    sprite.y = iy * SEPARATION_Y + app.screen.height / 2 - (AMOUNTY * SEPARATION_Y / 2);
+                    sprite.scale.set(baseScale);
+                    sprite.alpha = 0.75 + 0.25 * (1 - depthFactor); // Adjust opacity for depth
+        
+                    sprite.anchor.set(0.5, 0.5);
+                    planes.push(sprite);
+                    app.stage.addChild(sprite);
+                }
+            }
+        
+            app.ticker.add(() => {
+                planes.forEach((plane, i) => {
+                    const ix = i % AMOUNTX, iy = Math.floor(i / AMOUNTX);
+                    const scaleFactor = 1 - plane.scale.x + 0.5; // Recalculate scale factor from scale
+                    plane.y = iy * SEPARATION_Y + Math.sin((ix + count) * 0.5 + iy * 0.2) * 20 * scaleFactor + app.screen.height / 2 - (AMOUNTY * SEPARATION_Y / 2);
+                    plane.rotation = Math.sin((ix + count) * 0.3 + iy * 0.3) * Math.PI * 0.05;
+                });
+                count += 0.01;
+            });
+        
+            function createLetterCanvas(letter) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+        
+                const ctx = canvas.getContext('2d');
+                ctx.font = 'bold 40px Arial';
+                ctx.fillStyle = '#00ff00';
+                ctx.textAlign = 'center';
+                ctx.fillText(letter, 256, 400);
+        
+                return canvas;
+            }
+        
+            window.addEventListener("resize", () => {
+                app.renderer.resize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+async function initializeRightFaceAnimation(canvasId) {
         if (typeof BABYLON === "undefined") {
           await import("https://cdn.babylonjs.com/babylon.js");
           await import("https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js");
@@ -1136,8 +1136,7 @@
           return plane;
         }
       }
-      
-          function initializeLeftFaceAnimation(canvasId) {
+function initializeLeftFaceAnimation(canvasId) {
         const canvas = document.getElementById(canvasId);
         if (!canvas) {
           console.error("LeftFace canvas element not found");
@@ -1374,8 +1373,7 @@
         setup();
         draw(1);
       }
-    
-          function initializeTopFaceAnimation(canvasId) {
+function initializeTopFaceAnimation(canvasId) {
         let engine, scene, camera;
         let letters = [];
         let ripples = [];
