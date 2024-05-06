@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Welcome to Our Digital Frontier</title>
-  <script src="/libs/tween.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/23.1.1/tween.umd.js"></script>
   <style>
     body,
     html {
@@ -340,7 +340,7 @@
 
     <div id="narrative">
       <div class="narrative-part">
-        Welcome to APT! Your Behind-the-Scenes Coding Powerhouse.
+        Welcome to Agency Programming Team(APT)!<br> Your Behind-the-Scenes Coding Powerhouse.
       </div>
       <div class="narrative-part" id="narrative-one">
         Embark on a journey tailored to your curiosity and professional
@@ -361,7 +361,7 @@
     let isNamed = false;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    let charset = "<A P T / >".split("");
+    let charset = getCharset();
 
     document.addEventListener('click', function (event) {
       console.log('Clicked element:', event.target);
@@ -450,9 +450,11 @@
         if (userName.length === 3) {
           setTimeout(() => { // Delay to allow users to see their input
             localStorage.setItem("userName", userName);
+            isNamed = true; 
             document.getElementById("userNameDisplay").textContent = userName;
+            updateCharset();
             new TWEEN.Tween({ opacity: 1 })
-              .to({ opacity: 0 }, 500)
+              .to({ opacity: 0 }, 200)
               .onUpdate(function (object) {
                 mainContainer.style.opacity = object.opacity;
               })
@@ -463,7 +465,7 @@
                 }, noteParts);
               })
               .start();
-          }, 1000); // 1-second delay before processing
+          }, 500); // 1-second delay before processing
         }
       }
       );
@@ -552,7 +554,7 @@
                           experienceIframe.src = "experience.html";
                         }, 1000); // Delay hiding the preloader and showing the iframe by 1 second
                       }
-                    }, 1);
+                    }, 220);
                   })
                   .start();
               }, 3000); // 3-second delay before starting the fade out
